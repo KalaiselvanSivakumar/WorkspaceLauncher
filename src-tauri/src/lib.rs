@@ -35,8 +35,8 @@ async fn get_application_data(app_handle: AppHandle) -> Result<AppStateData, Str
     };
 
     // 4. Parse the string into valid JSON
-    match serde_json::from_str(&file_content) {
-        Ok(json) => json,
+    match serde_json::from_str::<AppStateData>(&file_content) {
+        Ok(json) => Ok(json),
         Err(e) => {
             eprintln!(
                 "[Error] Failed to parse JSON from file: {}. File might be corrupted.",
