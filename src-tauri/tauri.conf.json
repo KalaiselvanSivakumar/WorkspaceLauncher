@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "workspace-launcher",
+        "title": "Workspace Launcher",
         "width": 800,
         "height": 600
       }
