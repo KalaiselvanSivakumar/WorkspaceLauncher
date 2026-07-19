@@ -5,7 +5,7 @@ use ts_rs::TS;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/models.ts")]
-pub struct AppConfig {
+pub struct LauncherConfig {
     pub id: String,
     pub name: String,
     pub launchers: Vec<Launcher>,
@@ -63,5 +63,5 @@ pub struct Link {
 #[derive(Debug, Clone, Serialize, Deserialize, TS, Default)]
 #[ts(export, export_to = "../../src/types/models.ts")]
 pub struct AppStateData {
-    pub data: Vec<AppConfig>,
+    pub data: Vec<LauncherConfig>,
 }
