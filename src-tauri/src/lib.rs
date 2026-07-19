@@ -2,6 +2,8 @@
 
 use tauri::{AppHandle, Manager};
 
+pub mod models;
+
 #[tauri::command]
 async fn get_application_data(app_handle: AppHandle) -> serde_json::Value {
     // 1. Retrieve the application data directory
