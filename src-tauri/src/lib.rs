@@ -2,16 +2,18 @@
 
 use tauri::{AppHandle, Manager};
 
+use crate::models::AppStateData;
+
 pub mod models;
 
 #[tauri::command]
-async fn get_application_data(app_handle: AppHandle) -> serde_json::Value {
+async fn get_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
     // 1. Retrieve the application data directory
     let mut path = match app_handle.path().app_data_dir() {
         Ok(dir) => dir,
         Err(e) => {
             eprintln!("[Error] Failed to get application data directory: {}", e);
-            return serde_json::json!({});
+            return Err(format!("Failed to get application data directory: {}", e));
         }
     };
 
@@ -20,7 +22,7 @@ async fn get_application_data(app_handle: AppHandle) -> serde_json::Value {
     // 2. Check if the file exists
     if !path.exists() {
         println!("[Info] app_state.json does not exist yet. Returning empty object.");
-        return serde_json::json!({});
+        return Ok(AppStateData::default());
     }
 
     // 3. Read the file contents
@@ -28,7 +30,7 @@ async fn get_application_data(app_handle: AppHandle) -> serde_json::Value {
         Ok(content) => content,
         Err(e) => {
             eprintln!("[Error] Failed to read file at {:?}: {}", path, e);
-            return serde_json::json!({});
+            return Err(format!("Failed to read application data file: {}", e));
         }
     };
 
@@ -40,7 +42,7 @@ async fn get_application_data(app_handle: AppHandle) -> serde_json::Value {
                 "[Error] Failed to parse JSON from file: {}. File might be corrupted.",
                 e
             );
-            serde_json::json!({})
+            Err(format!("Application data file is corrupted: {}", e))
         }
     }
 }

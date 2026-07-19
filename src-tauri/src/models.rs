@@ -60,7 +60,7 @@ pub struct Link {
     pub url: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS, Default)]
 #[ts(export, export_to = "../../src/types/models.ts")]
 pub struct AppStateData {
     pub data: Vec<AppConfig>,
