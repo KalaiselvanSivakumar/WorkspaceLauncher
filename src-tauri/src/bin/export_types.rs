@@ -1,6 +1,6 @@
 use ts_rs::{Config, TS};
 use workspace_launcher_lib::models::{
-    LauncherConfig, AppStateData, ChromeLauncher, Launcher, Link, TabGroup, VsCodeLauncher,
+    AppStateData, ChromeLauncher, Launcher, LauncherConfig, Link, TabGroup, VsCodeLauncher,
 };
 
 fn main() {
