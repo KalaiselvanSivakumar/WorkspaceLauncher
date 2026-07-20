@@ -1,9 +1,8 @@
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, State};
 
-use crate::models::AppStateData;
+use crate::{models::{AppStateData, LauncherConfig}, state::AppState};
 
-#[tauri::command]
-pub async fn get_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
+fn load_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
     // 1. Retrieve the application data directory
     let mut path = match app_handle.path().app_data_dir() {
         Ok(dir) => dir,
@@ -39,6 +38,62 @@ pub async fn get_application_data(app_handle: AppHandle) -> Result<AppStateData,
                 e
             );
             Err(format!("Application data file is corrupted: {}", e))
+        }
+    }
+}
+
+#[tauri::command]
+pub async fn get_application_data(app_handle: AppHandle, state: State<'_, AppState>) -> Result<AppStateData, String> {
+    let data = load_application_data(app_handle)?;
+
+    // Store in Rust memory
+    let mut stored_data = state.data.lock().unwrap();
+    *stored_data = Some(data.clone());
+
+    // Return to frontend
+    Ok(data)
+}
+
+// TODO: This function is not yet tested.
+#[tauri::command]
+pub async fn add_launcher_config_to_app_state(
+    launcher_config: LauncherConfig,
+    app_handle: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    let mut data = state.data.lock().unwrap();
+
+    let app_state = data
+        .as_mut()
+        .ok_or("Application data not loaded")?;
+    
+    // Check if the launcher already exists in the state
+    if app_state.data.iter().any(|l| l.name == launcher_config.name) {
+        return Err(format!(
+            "Launcher with name '{}' already exists.",
+            launcher_config.name
+        ));
+    }
+
+    app_state.data.push(launcher_config.clone());
+
+    // Save the updated state back to the file
+    let path = match app_handle.path().app_data_dir() {
+        Ok(mut dir) => {
+            dir.push("app_state.json");
+            dir
+        }
+        Err(e) => {
+            eprintln!("[Error] Failed to get application data directory: {}", e);
+            return Err(format!("Failed to get application data directory: {}", e));
+        }
+    };
+
+    match std::fs::write(&path, serde_json::to_string_pretty(&app_state).unwrap()) {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            eprintln!("[Error] Failed to write to file at {:?}: {}", path, e);
+            Err(format!("Failed to save application data: {}", e))
         }
     }
 }
