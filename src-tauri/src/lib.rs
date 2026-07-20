@@ -14,9 +14,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(AppState {
-            data: Mutex::new(None)
+            data: Mutex::new(None),
         })
-        .invoke_handler(tauri::generate_handler![commands::get_application_data])
+        .invoke_handler(tauri::generate_handler![
+            commands::get_application_data,
+            commands::launch_workspace
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
