@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { LauncherConfig } from "@/types/models";
+import { PlayIcon } from "lucide-react";
 
 interface LauncherCardProps {
   readonly launcherConfig: LauncherConfig;
@@ -24,8 +25,9 @@ function LauncherCard({ launcherConfig }: LauncherCardProps) {
           <Button
             type="button"
             onClick={() => handleLaunch(launcherConfig.name)}
+            className="gap-1"
           >
-            Launch
+            <PlayIcon /> Launch
           </Button>
         </div>
       </div>
