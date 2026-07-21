@@ -1,8 +1,7 @@
 use tauri::{AppHandle, Manager, State};
 
 use crate::{
-    models::{AppStateData, Launcher, LauncherConfig},
-    state::AppState,
+    chrome, models::{AppStateData, Launcher, LauncherConfig}, state::AppState,
 };
 
 fn load_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
@@ -131,6 +130,10 @@ pub async fn launch_workspace(name: String, state: State<'_, AppState>) -> Resul
                     chrome_launcher.tab_group,
                     chrome_launcher.links
                 );
+                // print all chrome profiles
+                for profile in chrome::get_chrome_profiles().map_err(|e| format!("Failed to get Chrome profiles: {}", e))? {
+                    println!("Found Chrome profile: {}, {}, {}, {}", profile.profile_name, profile.name, profile.full_name, profile.email);
+                }
             }
             Launcher::VsCode(vscode_launcher) => {
                 // Launch VS Code with the specified action and path

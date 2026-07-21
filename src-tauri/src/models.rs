@@ -65,3 +65,11 @@ pub struct Link {
 pub struct AppStateData {
     pub data: Vec<LauncherConfig>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize,)]
+pub struct ChromeProfile {
+    pub profile_name: String,
+    pub name: String,
+    pub full_name: String,
+    pub email: String,
+}
