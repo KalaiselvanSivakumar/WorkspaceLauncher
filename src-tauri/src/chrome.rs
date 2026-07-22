@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 use crate::models::ChromeProfile;
 
 pub fn get_chrome_profiles() -> Result<Vec<ChromeProfile>, String> {
-    let mut path;
+    let mut path = PathBuf::new();
 
     #[cfg(target_os = "windows")]
     {
