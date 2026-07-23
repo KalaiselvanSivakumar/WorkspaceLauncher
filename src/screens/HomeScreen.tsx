@@ -4,6 +4,7 @@ import PageHeader from "@/components/app/PageHeader";
 import { useAppStore } from "@/stores/app-store";
 import { useEffect, useState } from "react";
 import HomeActionToolbar from "@/components/app/HomeActionToolbar";
+import CreateWorkspaceButton from "@/components/app/CreateWorkspaceButton";
 
 function HomeScreen() {
   const appStore = useAppStore();
@@ -19,13 +20,18 @@ function HomeScreen() {
     <div className="loading">Loading application data...</div>
   ) : (
     <section className="px-6 py-4">
-      <WorkspacesList workspaces={data.data} filterWorkspaceName={filterWorkspaceName} />
+      <WorkspacesList
+        workspaces={data.data}
+        filterWorkspaceName={filterWorkspaceName}
+      />
     </section>
   );
 
   return (
     <main>
-      <PageHeader title="Available Workspaces" />
+      <PageHeader title="Available Workspaces">
+        <CreateWorkspaceButton />
+      </PageHeader>
       <HomeActionToolbar setFilterWorkspaceName={setFilterWorkspaceName} />
       {mainContent}
     </main>
