@@ -1,14 +1,14 @@
 import PageHeader from "@/components/app/PageHeader";
 import { EditScreen, useUIStore } from "@/stores/ui-store";
 
-function EditLauncherScreen() {
+function EditWorkspaceScreen() {
   const screen = useUIStore((state) => state.screen) as EditScreen;
 
   return (
     <main>
-      <PageHeader title={`Edit ${screen.launcherName} Launcher`} />
+      <PageHeader title={`Edit ${screen.workspaceName} Workspace`} />
     </main>
   );
 }
 
-export default EditLauncherScreen;
+export default EditWorkspaceScreen;

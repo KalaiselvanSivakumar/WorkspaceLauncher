@@ -1,7 +1,7 @@
 use tauri::{AppHandle, Manager, State};
 
 use crate::{
-    chrome, models::{AppStateData, Launcher, LauncherConfig}, state::AppState,
+    chrome, models::{AppStateData, Launcher, WorkspaceConfig}, state::AppState,
 };
 
 fn load_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
@@ -62,7 +62,7 @@ pub async fn get_application_data(
 // TODO: This function is not yet tested.
 #[tauri::command]
 pub async fn add_launcher_config_to_app_state(
-    launcher_config: LauncherConfig,
+    launcher_config: WorkspaceConfig,
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {

@@ -1,13 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { LauncherConfig } from "@/types/models";
+import { WorkspaceConfig } from "@/types/models";
 import { InfoIcon, PencilIcon, PlayIcon } from "lucide-react";
 import { useState } from "react";
 import { useUIStore } from "@/stores/ui-store";
 
-interface LauncherCardProps {
-  readonly launcherConfig: LauncherConfig;
+interface WorkspaceCardProps {
+  readonly workspaceConfig: WorkspaceConfig;
 }
 
 async function handleLaunch(name: string) {
@@ -18,14 +18,14 @@ async function handleLaunch(name: string) {
   }
 }
 
-function LauncherCard({ launcherConfig }: LauncherCardProps) {
+function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const showEdit = useUIStore((state) => state.showEdit);
 
   return (
     <Card>
       <div className="flex items-center justify-between px-6">
-        <h3 className="text-base font-medium">{launcherConfig.name}</h3>
+        <h3 className="text-base font-medium">{workspaceConfig.name}</h3>
         <div className="flex gap-4">
           <Button
             type="button"
@@ -39,13 +39,13 @@ function LauncherCard({ launcherConfig }: LauncherCardProps) {
             type="button"
             variant="outline"
             className="gap-1"
-            onClick={() => showEdit(launcherConfig.name)}
+            onClick={() => showEdit(workspaceConfig.name)}
           >
             <PencilIcon /> Edit
           </Button>
           <Button
             type="button"
-            onClick={() => handleLaunch(launcherConfig.name)}
+            onClick={() => handleLaunch(workspaceConfig.name)}
             className="gap-1"
           >
             <PlayIcon /> Launch
@@ -56,4 +56,4 @@ function LauncherCard({ launcherConfig }: LauncherCardProps) {
   );
 }
 
-export default LauncherCard;
+export default WorkspaceCard;
