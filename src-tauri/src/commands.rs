@@ -1,7 +1,9 @@
 use tauri::{AppHandle, Manager, State};
 
 use crate::{
-    chrome, models::{AppStateData, Launcher, WorkspaceConfig}, state::AppState,
+    chrome::execute_chrome_launcher,
+    models::{AppStateData, Launcher, WorkspaceConfig},
+    state::AppState,
 };
 
 fn load_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
@@ -121,25 +123,13 @@ pub async fn launch_workspace(name: String, state: State<'_, AppState>) -> Resul
     for launcher in &launcher_config.launchers {
         match launcher {
             Launcher::Chrome(chrome_launcher) => {
-                // Launch Chrome with the specified action, profile, tab group, and links
-                // Implement the logic to launch Chrome here
-                println!(
-                    "Launching Chrome with action: {}, profile: {:?}, tab group: {:?}, links: {:?}",
-                    chrome_launcher.action,
-                    chrome_launcher.profile,
-                    chrome_launcher.tab_group,
-                    chrome_launcher.links
-                );
-                // print all chrome profiles
-                for profile in chrome::get_chrome_profiles().map_err(|e| format!("Failed to get Chrome profiles: {}", e))? {
-                    println!("Found Chrome profile: {}, {}, {}, {}", profile.profile_name, profile.name, profile.full_name, profile.email);
-                }
+                let result = execute_chrome_launcher(chrome_launcher);
             }
             Launcher::VsCode(vscode_launcher) => {
                 // Launch VS Code with the specified action and path
                 // Implement the logic to launch VS Code here
                 println!(
-                    "Launching VS Code with action: {}, path: {:?}",
+                    "Launching VS Code with action: {:?}, path: {:?}",
                     vscode_launcher.action, vscode_launcher.path
                 );
             }
