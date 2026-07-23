@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { WorkspaceConfig } from "@/types/models";
+import { Launcher, WorkspaceConfig } from "@/types/models";
 import { InfoIcon, PencilIcon, RocketIcon } from "lucide-react";
 import { useState } from "react";
 import { useUIStore } from "@/stores/ui-store";
@@ -19,6 +19,17 @@ async function handleLaunch(name: string) {
   }
 }
 
+function getActionsCount(launchers: Launcher[]) {
+  return launchers.reduce((previousValue, launcher) => {
+    switch (launcher.appName) {
+      case "chrome":
+        return previousValue + launcher.links.length;
+      case "vs-code":
+        return previousValue + (launcher.path ? 1 : 0);
+    }
+  }, 0);
+}
+
 function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const showConfigure = useUIStore((state) => state.showConfigure);
@@ -28,7 +39,14 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
       <div className="flex items-center justify-between px-6">
         <div className="flex items-start flex-col gap-2">
           <h3 className="text-base font-medium">{workspaceConfig.name}</h3>
-          <Badge>{workspaceConfig.launchers.length} Launchers Configured</Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={"secondary"}>
+              Launchers: {workspaceConfig.launchers.length}
+            </Badge>
+            <Badge variant={"secondary"}>
+              Actions: {getActionsCount(workspaceConfig.launchers)}
+            </Badge>
+          </div>
         </div>
         <div className="flex gap-4">
           <Button
