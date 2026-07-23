@@ -48,6 +48,7 @@ pub struct VsCodeLauncher {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/models.ts")]
 pub enum LauncherAction {
+    #[serde(rename = "open")]
     Open,
 }
 

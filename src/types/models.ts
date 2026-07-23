@@ -6,7 +6,7 @@ export type ChromeLauncher = { action: LauncherAction, profile: string | null, t
 
 export type Launcher = { "appName": "chrome" } & ChromeLauncher | { "appName": "vs-code" } & VsCodeLauncher;
 
-export type LauncherAction = "Open";
+export type LauncherAction = "open";
 
 export type Link = { url: string, };
 
