@@ -1,8 +1,8 @@
 import { create } from "zustand";
 
-export type EditScreen = { type: "edit"; workspaceName: string };
+export type ConfigureScreen = { type: "configure"; workspaceName: string };
 
-type Screen = { type: "home" } | { type: "create" } | EditScreen;
+type Screen = { type: "home" } | { type: "create" } | ConfigureScreen;
 
 interface UIStoreState {
   screen: Screen;
@@ -11,7 +11,7 @@ interface UIStoreState {
 interface UIStoreActions {
   showHome(): void;
   showCreate(): void;
-  showEdit(workspaceName: string): void;
+  showConfigure(workspaceName: string): void;
 }
 
 type UIState = UIStoreState & UIStoreActions;
@@ -21,6 +21,6 @@ export const useUIStore = create<UIState>((set) => ({
 
   showHome: () => set({ screen: { type: "home" } }),
   showCreate: () => set({ screen: { type: "create" } }),
-  showEdit: (workspaceName: string) =>
-    set({ screen: { type: "edit", workspaceName } }),
+  showConfigure: (workspaceName: string) =>
+    set({ screen: { type: "configure", workspaceName } }),
 }));

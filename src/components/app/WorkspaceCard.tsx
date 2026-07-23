@@ -20,7 +20,7 @@ async function handleLaunch(name: string) {
 
 function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
   const [showDetails, setShowDetails] = useState(false);
-  const showEdit = useUIStore((state) => state.showEdit);
+  const showConfigure = useUIStore((state) => state.showConfigure);
 
   return (
     <Card>
@@ -39,9 +39,9 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
             type="button"
             variant="outline"
             className="gap-1"
-            onClick={() => showEdit(workspaceConfig.name)}
+            onClick={() => showConfigure(workspaceConfig.name)}
           >
-            <PencilIcon /> Edit
+            <PencilIcon /> Configure
           </Button>
           <Button
             type="button"

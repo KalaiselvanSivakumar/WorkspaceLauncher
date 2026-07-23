@@ -1,7 +1,7 @@
 import { useUIStore } from "./stores/ui-store";
 import HomeScreen from "./screens/HomeScreen";
 import CreateWorkspaceScreen from "./screens/CreateWorkspaceScreen";
-import EditWorkspaceScreen from "./screens/EditWorkspaceScreen";
+import ConfigureWorkspaceScreen from "./screens/ConfigureWorkspaceScreen";
 
 function App() {
   const screen = useUIStore((state) => state.screen);
@@ -11,8 +11,8 @@ function App() {
       return <HomeScreen />;
     case "create":
       return <CreateWorkspaceScreen />;
-    case "edit":
-      return <EditWorkspaceScreen />;
+    case "configure":
+      return <ConfigureWorkspaceScreen />;
     default:
       return null;
   }
