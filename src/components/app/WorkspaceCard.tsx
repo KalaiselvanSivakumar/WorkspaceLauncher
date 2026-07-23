@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
-import { Button } from "../ui/button";
-import { Card } from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { WorkspaceConfig } from "@/types/models";
 import { InfoIcon, PencilIcon, RocketIcon } from "lucide-react";
 import { useState } from "react";
@@ -25,7 +26,10 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
   return (
     <Card>
       <div className="flex items-center justify-between px-6">
-        <h3 className="text-base font-medium">{workspaceConfig.name}</h3>
+        <div className="flex items-start flex-col gap-2">
+          <h3 className="text-base font-medium">{workspaceConfig.name}</h3>
+          <Badge>{workspaceConfig.launchers.length} Launchers Configured</Badge>
+        </div>
         <div className="flex gap-4">
           <Button
             type="button"
@@ -33,7 +37,7 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
             className="gap-1"
             onClick={() => setShowDetails(!showDetails)}
           >
-            <InfoIcon /> {showDetails ? "Hide" : "Show"}
+            <InfoIcon /> {showDetails ? "Hide" : "Show"} Details
           </Button>
           <Button
             type="button"
