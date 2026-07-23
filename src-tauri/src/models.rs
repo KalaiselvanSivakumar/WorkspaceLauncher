@@ -25,7 +25,7 @@ pub enum Launcher {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/models.ts")]
 pub struct ChromeLauncher {
-    pub action: String,
+    pub action: LauncherAction,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub profile: Option<String>,
@@ -39,10 +39,16 @@ pub struct ChromeLauncher {
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/models.ts")]
 pub struct VsCodeLauncher {
-    pub action: String,
+    pub action: LauncherAction,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub path: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/models.ts")]
+pub enum LauncherAction {
+    Open,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -66,7 +72,7 @@ pub struct AppStateData {
     pub data: Vec<WorkspaceConfig>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize,)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChromeProfile {
     pub profile_name: String,
     pub name: String,

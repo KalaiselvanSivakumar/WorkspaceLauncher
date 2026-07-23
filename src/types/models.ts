@@ -2,14 +2,16 @@
 
 export type AppStateData = { data: Array<WorkspaceConfig>, };
 
-export type ChromeLauncher = { action: string, profile: string | null, tab_group: TabGroup | null, links: Array<Link>, };
+export type ChromeLauncher = { action: LauncherAction, profile: string | null, tab_group: TabGroup | null, links: Array<Link>, };
 
 export type Launcher = { "appName": "chrome" } & ChromeLauncher | { "appName": "vs-code" } & VsCodeLauncher;
+
+export type LauncherAction = "Open";
 
 export type Link = { url: string, };
 
 export type TabGroup = { name: string, color: string | null, };
 
-export type VsCodeLauncher = { action: string, path: string | null, };
+export type VsCodeLauncher = { action: LauncherAction, path: string | null, };
 
 export type WorkspaceConfig = { id: string, name: string, launchers: Array<Launcher>, };
