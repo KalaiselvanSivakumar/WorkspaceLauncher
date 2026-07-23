@@ -7,7 +7,7 @@ function CreateWorkspaceButton() {
 
   return (
     <Button type="button" className="gap-1" onClick={() => showCreate()}>
-      <PlusIcon /> Create Workspace
+      <PlusIcon /> New Workspace
     </Button>
   );
 }
