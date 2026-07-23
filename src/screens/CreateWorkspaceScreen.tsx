@@ -1,18 +1,19 @@
-import GoToHomeScreenButton from "@/components/app/GoToHomeScreenButton";
+import HeaderActions from "@/components/app/HeaderActions";
 import PageHeader from "@/components/app/PageHeader";
-import { Button } from "@/components/ui/button";
-import { SaveIcon } from "lucide-react";
+import { useCallback } from "react";
 
 function CreateWorkspaceScreen() {
+  const handlePrimaryAction = useCallback(function () {
+    console.log("Primary Action is clicked");
+  }, []);
+
   return (
     <main>
       <PageHeader title="Create Workspace" showBackAction>
-        <div className="flex gap-4">
-          <GoToHomeScreenButton variant="text" />
-          <Button type="button">
-            <SaveIcon /> Save Workspace
-          </Button>
-        </div>
+        <HeaderActions
+          actionButtonText="Create"
+          handleAction={handlePrimaryAction}
+        />
       </PageHeader>
     </main>
   );
