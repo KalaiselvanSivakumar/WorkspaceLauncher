@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { WorkspaceConfig } from "@/types/models";
-import { InfoIcon, PencilIcon, PlayIcon } from "lucide-react";
+import { InfoIcon, PencilIcon, RocketIcon } from "lucide-react";
 import { useState } from "react";
 import { useUIStore } from "@/stores/ui-store";
 
@@ -48,7 +48,7 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
             onClick={() => handleLaunch(workspaceConfig.name)}
             className="gap-1"
           >
-            <PlayIcon /> Launch
+            <RocketIcon /> Launch Workspace
           </Button>
         </div>
       </div>
