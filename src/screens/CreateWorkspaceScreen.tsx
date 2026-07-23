@@ -1,3 +1,4 @@
+import GoToHomeScreenButton from "@/components/app/GoToHomeScreenButton";
 import PageHeader from "@/components/app/PageHeader";
 import { Button } from "@/components/ui/button";
 import { SaveIcon } from "lucide-react";
@@ -5,11 +6,9 @@ import { SaveIcon } from "lucide-react";
 function CreateWorkspaceScreen() {
   return (
     <main>
-      <PageHeader title="Create Workspace">
+      <PageHeader title="Create Workspace" showBackAction>
         <div className="flex gap-4">
-          <Button type="button" variant={"outline"}>
-            Cancel
-          </Button>
+          <GoToHomeScreenButton variant="text" />
           <Button type="button">
             <SaveIcon /> Save Workspace
           </Button>
