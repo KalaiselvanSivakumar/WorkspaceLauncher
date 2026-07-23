@@ -1,13 +1,16 @@
-interface PageHeaderProps {
-    title: string
+import React from "react";
+
+interface PageHeaderProps extends React.PropsWithChildren {
+  title: string;
 }
 
-function PageHeader({ title }: PageHeaderProps) {
-    return (
-        <h1 className="border-b border-border px-6 py-4 font-heading text-base font-medium">
-            {title}
-        </h1>
-    )
+function PageHeader({ title, children }: PageHeaderProps) {
+  return (
+    <div className="border-b border-border flex justify-between px-6 py-4">
+      <h1 className="font-heading text-base font-medium">{title}</h1>
+      {children}
+    </div>
+  );
 }
 
 export default PageHeader;
