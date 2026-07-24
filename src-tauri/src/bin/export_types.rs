@@ -1,7 +1,7 @@
 use ts_rs::{Config, TS};
 use workspace_launcher_lib::models::{
-    AppStateData, ChromeLauncher, Launcher, LauncherAction, Link, TabGroup, VsCodeLauncher,
-    WorkspaceConfig,
+    AppStateData, ChromeLauncher, CreateWorkspacePayload, Launcher, LauncherAction, Link, TabGroup,
+    VsCodeLauncher, WorkspaceConfig,
 };
 
 fn main() {
@@ -15,4 +15,5 @@ fn main() {
     TabGroup::export(&config).unwrap();
     Link::export(&config).unwrap();
     AppStateData::export(&config).unwrap();
+    CreateWorkspacePayload::export(&config).unwrap();
 }

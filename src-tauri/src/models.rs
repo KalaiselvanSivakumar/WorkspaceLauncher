@@ -73,6 +73,13 @@ pub struct AppStateData {
     pub data: Vec<WorkspaceConfig>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/models.ts")]
+pub struct CreateWorkspacePayload {
+    pub name: String,
+    pub launchers: Vec<Launcher>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChromeProfile {
     pub profile_name: String,
