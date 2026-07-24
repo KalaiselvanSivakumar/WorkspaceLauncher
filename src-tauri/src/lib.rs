@@ -20,6 +20,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::get_application_data,
+            commands::create_workspace,
             commands::launch_workspace
         ])
         .run(tauri::generate_context!())

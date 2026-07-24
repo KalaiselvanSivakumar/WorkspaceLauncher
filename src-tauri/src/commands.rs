@@ -2,7 +2,7 @@ use tauri::{AppHandle, Manager, State};
 
 use crate::{
     chrome::execute_chrome_launcher,
-    models::{AppStateData, Launcher, WorkspaceConfig},
+    models::{AppStateData, CreateWorkspacePayload, Launcher},
     state::AppState,
 };
 
@@ -63,28 +63,34 @@ pub async fn get_application_data(
 
 // TODO: This function is not yet tested.
 #[tauri::command]
-pub async fn add_launcher_config_to_app_state(
-    launcher_config: WorkspaceConfig,
+pub async fn create_workspace(
+    workspace_payload: CreateWorkspacePayload,
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
+    println!(
+        "Received workspace creation payload: {:?}",
+        workspace_payload
+    );
+
     let mut data = state.data.lock().unwrap();
 
     let app_state = data.as_mut().ok_or("Application data not loaded")?;
 
-    // Check if the launcher already exists in the state
+    // Check if the workspace already exists in the state
     if app_state
         .data
         .iter()
-        .any(|l| l.name == launcher_config.name)
+        .any(|l| l.name == workspace_payload.name)
     {
         return Err(format!(
-            "Launcher with name '{}' already exists.",
-            launcher_config.name
+            "Workspace with name '{}' already exists.",
+            workspace_payload.name
         ));
     }
 
-    app_state.data.push(launcher_config.clone());
+    // Create WorkspaceConfig from CreateWorkspacePayload
+    // app_state.data.push(workspace_payload.clone());
 
     // Save the updated state back to the file
     let path = match app_handle.path().app_data_dir() {
