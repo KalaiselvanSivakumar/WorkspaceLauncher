@@ -1,11 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Launcher, WorkspaceConfig } from "@/types/models";
+import { WorkspaceConfig } from "@/types/models";
 import { InfoIcon, PencilIcon, RocketIcon } from "lucide-react";
 import { useState } from "react";
 import { useUIStore } from "@/stores/ui-store";
+import LauncherCard from "./launcher/view/LauncherCard";
+import { getActionsCountFromLaunchers } from "@/utils/launchers";
 
 interface WorkspaceCardProps {
   readonly workspaceConfig: WorkspaceConfig;
@@ -17,17 +19,6 @@ async function handleLaunch(name: string) {
   } catch (error) {
     console.error("Error launching workspace:", error);
   }
-}
-
-function getActionsCount(launchers: Launcher[]) {
-  return launchers.reduce((previousValue, launcher) => {
-    switch (launcher.appName) {
-      case "chrome":
-        return previousValue + launcher.links.length;
-      case "vs-code":
-        return previousValue + (launcher.path ? 1 : 0);
-    }
-  }, 0);
 }
 
 function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
@@ -44,7 +35,7 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
               Launchers: {workspaceConfig.launchers.length}
             </Badge>
             <Badge variant={"secondary"}>
-              Actions: {getActionsCount(workspaceConfig.launchers)}
+              Actions: {getActionsCountFromLaunchers(workspaceConfig.launchers)}
             </Badge>
           </div>
         </div>
@@ -74,6 +65,17 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
           </Button>
         </div>
       </div>
+      <CardContent>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {workspaceConfig.launchers.map((launcher, index) => (
+            <LauncherCard
+              launcher={launcher}
+              position={index + 1}
+              key={launcher.appName + index}
+            />
+          ))}
+        </div>
+      </CardContent>
     </Card>
   );
 }
