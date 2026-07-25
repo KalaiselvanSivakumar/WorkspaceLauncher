@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Launcher } from "@/types/models";
 import { getUserFriendlyAppName } from "@/utils/launchers";
 import LauncherAppIcon from "./LauncherAppIcon";
+import AppLauncherInfo from "./AppLauncherInfo";
 
 interface LauncherCardProps {
   launcher: Launcher;
@@ -19,6 +20,9 @@ function LauncherCard({ launcher, position }: LauncherCardProps) {
           <Badge variant={"outline"}>Launcher #{position}</Badge>
         </CardTitle>
       </CardHeader>
+      <CardContent>
+        <AppLauncherInfo launcher={launcher} />
+      </CardContent>
     </Card>
   );
 }
