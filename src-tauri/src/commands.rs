@@ -1,10 +1,21 @@
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Manager, State, Window};
 
 use crate::{
     chrome::execute_chrome_launcher,
     models::{AppStateData, CreateWorkspacePayload, Launcher},
     state::AppState,
 };
+
+#[tauri::command]
+pub async fn pick_folder(window: Window) -> Result<Option<String>, String> {
+    let folder = rfd::AsyncFileDialog::new()
+        .set_title("Select Project Folder")
+        .set_parent(&window)
+        .pick_folder()
+        .await;
+
+    Ok(folder.map(|f| f.path().display().to_string()))
+}
 
 fn load_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
     // 1. Retrieve the application data directory
