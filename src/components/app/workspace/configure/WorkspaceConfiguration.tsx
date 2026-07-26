@@ -1,4 +1,10 @@
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
 import HeaderActions from "../../HeaderActions";
 import PageHeader from "../../PageHeader";
 import { Input } from "@/components/ui/input";
@@ -9,18 +15,29 @@ import { PlusIcon } from "lucide-react";
 import { Chrome, VisualStudioCode } from "@dev.icons/react";
 import { Launcher, WorkspaceConfig } from "@/types/models";
 import { useState } from "react";
+import { MAX_LAUNCHERS_PER_WORKSPACE } from "@/utils/launchers";
 
 interface WorkspaceConfigurationProps {
   text: {
     pageTitle: string;
     primaryActionText: string;
-  }
+  };
   handlePrimaryAction: () => void;
   workspaceConfig?: WorkspaceConfig;
 }
 
-function WorkspaceConfiguration({ text, handlePrimaryAction, workspaceConfig }: WorkspaceConfigurationProps) {
-  const [newWorkspaceConfig, setNewWorkspaceConfig] = useState<WorkspaceConfig>(workspaceConfig || { id: "", name: "", launchers: [] as Launcher[] });
+function WorkspaceConfiguration({
+  text,
+  handlePrimaryAction,
+  workspaceConfig,
+}: WorkspaceConfigurationProps) {
+  const [newWorkspaceConfig, setNewWorkspaceConfig] = useState<WorkspaceConfig>(
+    workspaceConfig || { id: "", name: "", launchers: [] as Launcher[] },
+  );
+
+  const launchersCount = newWorkspaceConfig.launchers.length;
+  const disableAddLauncherAction =
+    launchersCount >= MAX_LAUNCHERS_PER_WORKSPACE;
 
   return (
     <main>
@@ -34,7 +51,13 @@ function WorkspaceConfiguration({ text, handlePrimaryAction, workspaceConfig }: 
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor="workspaceName">Workspace Name</FieldLabel>
-            <Input id="workspaceName" placeholder="Workspace Name (e.g., Trading & Investment, Hobby project)" name="workspaceName" type="text" required />
+            <Input
+              id="workspaceName"
+              placeholder="Workspace Name (e.g., Trading & Investment, Hobby project)"
+              name="workspaceName"
+              type="text"
+              required
+            />
           </Field>
         </FieldGroup>
         <FieldGroup>
@@ -42,16 +65,18 @@ function WorkspaceConfiguration({ text, handlePrimaryAction, workspaceConfig }: 
             <FieldLegend>
               <div className="flex gap-2 items-center">
                 Configured Launchers
-                <Badge variant="secondary">{newWorkspaceConfig.launchers.length} / 20 configured</Badge>
+                <Badge variant="secondary">
+                  {launchersCount} / {MAX_LAUNCHERS_PER_WORKSPACE} configured
+                </Badge>
               </div>
             </FieldLegend>
-            <ButtonGroup>
-              <Button variant={"outline"}>
+            <ButtonGroup className="flex justify-center w-full">
+              <Button variant={"outline"} disabled={disableAddLauncherAction}>
                 <PlusIcon />
                 <Chrome className="w-4 h-4 mx-1" />
                 Google Chrome
               </Button>
-              <Button variant={"outline"}>
+              <Button variant={"outline"} disabled={disableAddLauncherAction}>
                 <PlusIcon />
                 <VisualStudioCode className="w-4 h-4 mx-1" />
                 VS Code
