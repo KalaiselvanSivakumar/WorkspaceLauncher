@@ -65,17 +65,19 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
           </Button>
         </div>
       </div>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {workspaceConfig.launchers.map((launcher, index) => (
-            <LauncherCard
-              launcher={launcher}
-              position={index + 1}
-              key={launcher.appName + index}
-            />
-          ))}
-        </div>
-      </CardContent>
+      {showDetails && (
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {workspaceConfig.launchers.map((launcher, index) => (
+              <LauncherCard
+                launcher={launcher}
+                position={index + 1}
+                key={launcher.appName + index}
+              />
+            ))}
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 }
