@@ -3,10 +3,11 @@ import { VsCodeLauncher } from "@/types/models";
 import SelectLauncherAction from "./SelectLauncherAction";
 import { VS_CODE_MAX_PROJECTS } from "@/utils/launchers";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, Plus, Trash2 } from "lucide-react";
+import { FolderOpen, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { WorkspaceFormData } from "../../workspace/configure/WorkspaceForm";
 import { invoke } from "@tauri-apps/api/core";
+import TargetsConfigureSectionHeader from "./TargetsConfigureSectionHeader";
 
 interface VisualStudioCodeLauncherConfigureProps {
   launcher: VsCodeLauncher;
@@ -36,26 +37,17 @@ function VisualStudioCodeLauncherConfigure({
 }: VisualStudioCodeLauncherConfigureProps) {
   const selectedProjectsCount = launcher.path != null ? 1 : 0;
   const currentProjectsCount = launcher.path ? 1 : 0;
+  const targetsConfigureSectionTitle = `Project Folders (${currentProjectsCount} / ${VS_CODE_MAX_PROJECTS})`;
 
   return (
     <div className="flex flex-col gap-4">
       <SelectLauncherAction />
-      <div className="flex items-center justify-between border-t pt-2 h-6">
-        <span className="text-xs font-medium">
-          Project Folders ({currentProjectsCount} / {VS_CODE_MAX_PROJECTS})
-        </span>
-        {selectedProjectsCount < VS_CODE_MAX_PROJECTS && (
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            className="p-0 text-xs"
-            onClick={() => handleAddPath(launcherIndex)}
-          >
-            <Plus className="w-3 h-3 mr-1" /> Add Folder
-          </Button>
-        )}
-      </div>
+      <TargetsConfigureSectionHeader
+        sectionTitle={targetsConfigureSectionTitle}
+        showAddTargetButton={selectedProjectsCount < VS_CODE_MAX_PROJECTS}
+        addTargetButtonText="Add Folder"
+        handleAddTargetAction={() => handleAddPath(launcherIndex)}
+      />
       {launcher.path != null && (
         <div className="flex gap-2">
           <Input
