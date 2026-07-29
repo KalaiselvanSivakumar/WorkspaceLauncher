@@ -1,8 +1,8 @@
 use tauri::{AppHandle, Manager, State, Window};
 
 use crate::{
-    chrome::execute_chrome_launcher,
-    models::{AppStateData, CreateWorkspacePayload, Launcher},
+    chrome::{execute_chrome_launcher, get_chrome_profiles},
+    models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher},
     state::AppState,
 };
 
@@ -15,6 +15,15 @@ pub async fn pick_folder(window: Window) -> Result<Option<String>, String> {
         .await;
 
     Ok(folder.map(|f| f.path().display().to_string()))
+}
+
+#[tauri::command]
+pub async fn fetch_chrome_profiles() -> Result<Vec<ChromeProfileDto>, String> {
+    let internal_profiles = get_chrome_profiles()?;
+    Ok(internal_profiles
+        .iter()
+        .map(ChromeProfileDto::from)
+        .collect())
 }
 
 fn load_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {

@@ -21,6 +21,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_application_data,
             commands::pick_folder,
+            commands::fetch_chrome_profiles,
             commands::create_workspace,
             commands::launch_workspace
         ])
