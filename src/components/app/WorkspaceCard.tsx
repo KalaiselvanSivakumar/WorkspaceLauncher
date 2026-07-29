@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useUIStore } from "@/stores/ui-store";
 import LauncherCard from "./launcher/view/LauncherCard";
 import { getActionsCountFromLaunchers } from "@/utils/launchers";
+import AppLauncherInfo from "./launcher/view/AppLauncherInfo";
 
 interface WorkspaceCardProps {
   readonly workspaceConfig: WorkspaceConfig;
@@ -73,7 +74,9 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
                 launcher={launcher}
                 position={index + 1}
                 key={launcher.appName + index}
-              />
+              >
+                <AppLauncherInfo launcher={launcher} />
+              </LauncherCard>
             ))}
           </div>
         </CardContent>
