@@ -3,11 +3,13 @@ import GoToHomeScreenButton from "./GoToHomeScreenButton";
 
 interface PageHeaderProps extends React.PropsWithChildren {
   title: string;
+  description?: string;
   showBackAction?: boolean;
 }
 
 function PageHeader({
   title,
+  description,
   children,
   showBackAction = false,
 }: PageHeaderProps) {
@@ -15,7 +17,12 @@ function PageHeader({
     <div className="border-b border-border flex justify-between items-center px-6 py-4">
       <div className="flex gap-2 items-center">
         {showBackAction && <GoToHomeScreenButton variant="icon" />}
-        <h1 className="font-heading text-base font-medium">{title}</h1>
+        <div>
+          <h1 className="font-semibold text-xl">{title}</h1>
+          {description && (
+            <p className="text-sm text-muted-foreground">{description}</p>
+          )}
+        </div>
       </div>
       {children}
     </div>
