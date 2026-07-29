@@ -4,6 +4,8 @@ export type AppStateData = { data: Array<WorkspaceConfig>, };
 
 export type ChromeLauncher = { action: LauncherAction, profile: string | null, tab_group: TabGroup | null, links: Array<Link>, };
 
+export type ChromeProfileDto = { profile_name: string, full_name: string, };
+
 export type CreateWorkspacePayload = { name: string, launchers: Array<Launcher>, };
 
 export type Launcher = { "appName": "chrome" } & ChromeLauncher | { "appName": "vs-code" } & VsCodeLauncher;

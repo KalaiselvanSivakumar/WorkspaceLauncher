@@ -87,3 +87,19 @@ pub struct ChromeProfile {
     pub full_name: String,
     pub email: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/models.ts")]
+pub struct ChromeProfileDto {
+    pub profile_name: String,
+    pub full_name: String,
+}
+
+impl From<&ChromeProfile> for ChromeProfileDto {
+    fn from(profile: &ChromeProfile) -> Self {
+        Self {
+            profile_name: profile.profile_name.clone(),
+            full_name: profile.full_name.clone(),
+        }
+    }
+}
