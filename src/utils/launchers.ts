@@ -10,9 +10,9 @@ export function getActionsCountFromLaunchers(launchers: Launcher[]) {
   return launchers.reduce((previousValue, launcher) => {
     switch (launcher.appName) {
       case "chrome":
-        return previousValue + launcher.links.length;
+        return previousValue + (launcher.links.length || 1);
       case "vs-code":
-        return previousValue + (launcher.path ? 1 : 0);
+        return previousValue + 1;
     }
   }, 0);
 }
