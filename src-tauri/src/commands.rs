@@ -81,36 +81,40 @@ pub async fn get_application_data(
     Ok(data)
 }
 
-// TODO: This function is not yet tested.
 #[tauri::command]
 pub async fn create_workspace(
-    workspace_payload: CreateWorkspacePayload,
+    payload: CreateWorkspacePayload,
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<(), String> {
-    println!(
-        "Received workspace creation payload: {:?}",
-        workspace_payload
-    );
+    println!("Received workspace creation payload: {:?}", payload);
 
     let mut data = state.data.lock().unwrap();
 
     let app_state = data.as_mut().ok_or("Application data not loaded")?;
 
+    // Helper closure to normalize names by removing whitespace and lowercasing
+    let normalize_name = |name: &str| -> String {
+        name.split_whitespace()
+            .collect::<Vec<&str>>()
+            .join("")
+            .to_lowercase()
+    };
+
     // Check if the workspace already exists in the state
     if app_state
         .data
         .iter()
-        .any(|l| l.name == workspace_payload.name)
+        .any(|l| normalize_name(&l.name) == normalize_name(&payload.name))
     {
         return Err(format!(
             "Workspace with name '{}' already exists.",
-            workspace_payload.name
+            payload.name
         ));
     }
 
     // Create WorkspaceConfig from CreateWorkspacePayload
-    // app_state.data.push(workspace_payload.clone());
+    app_state.data.push(payload.into());
 
     // Save the updated state back to the file
     let path = match app_handle.path().app_data_dir() {
