@@ -1,16 +1,20 @@
-import { Launcher } from "@/types/models";
-import { useCallback, useState } from "react";
 import WorkspaceForm from "@/components/app/workspace/configure/WorkspaceForm";
+import { CreateWorkspacePayload } from "@/types/models";
+import { invoke } from "@tauri-apps/api/core";
 
 function CreateWorkspaceScreen() {
-  const [launchers, setLaunchers] = useState<Launcher[]>([]);
-
-  const handlePrimaryAction = useCallback(function () {
-    console.log("Primary Action is clicked");
-  }, []);
+  async function onSubmit(data: CreateWorkspacePayload) {
+    console.log(data);
+    try {
+      await invoke("create_workspace", { payload: data });
+      // TODO: Return back to home screen, show success message toast, scroll to newly created workspace
+    } catch (err) {
+      console.error("Failed to save workspace:", err);
+      // TODO: Show failure toast message or dialog
+    }
+  }
 
   return (
-    // <WorkspaceConfiguration text={{ pageTitle: "Create Workspace", primaryActionText: "Create" }} launchers={launchers} handlePrimaryAction={handlePrimaryAction} />
     <WorkspaceForm
       text={{
         pageTitle: "Create Workspace",
@@ -18,8 +22,7 @@ function CreateWorkspaceScreen() {
         pageDescription: "Configure launchers and paths for your workspace.",
         submittingFormText: "Creating workspace...",
       }}
-      onCancel={function () {}}
-      onSuccess={function () {}}
+      onSubmit={onSubmit}
     />
   );
 }

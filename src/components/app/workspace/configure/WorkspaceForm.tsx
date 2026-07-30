@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { ChromeProfileDto, Launcher } from "@/types/models";
 import { MAX_LAUNCHERS_PER_WORKSPACE } from "@/utils/launchers";
 import { Badge } from "@/components/ui/badge";
@@ -35,17 +35,16 @@ interface WorkspaceFormProps {
     submittingFormText: string;
   };
   initialData?: WorkspaceFormData;
-  onCancel: () => void;
-  onSuccess: () => void;
+  additionalActions?: JSX.Element;
+  onSubmit: (data: WorkspaceFormData) => void;
 }
 
 export default function WorkspaceForm({
   text,
   initialData,
-  onCancel,
-  onSuccess,
+  additionalActions,
+  onSubmit,
 }: WorkspaceFormProps) {
-  const isEditing = !!initialData?.id;
   const [chromeProfiles, setChromeProfiles] = useState<ChromeProfileDto[]>([]);
 
   const {
@@ -148,19 +147,6 @@ export default function WorkspaceForm({
     });
   };
 
-  const onSubmit = async (data: WorkspaceFormData) => {
-    try {
-      if (isEditing) {
-        await invoke("update_workspace", { payload: data });
-      } else {
-        await invoke("create_workspace", { payload: data });
-      }
-      onSuccess();
-    } catch (err) {
-      console.error("Failed to save workspace:", err);
-    }
-  };
-
   const launchersCount = launcherFields.length;
   const disableAddLauncherAction =
     launchersCount >= MAX_LAUNCHERS_PER_WORKSPACE;
@@ -178,7 +164,9 @@ export default function WorkspaceForm({
             isSubmitting={isSubmitting}
             submittingText={text.submittingFormText}
             handleAction={() => {}}
-          />
+          >
+            {additionalActions}
+          </HeaderActions>
         </PageHeader>
 
         <div className="flex gap-6 flex-col w-full px-12 py-8">

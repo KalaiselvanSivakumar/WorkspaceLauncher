@@ -1,7 +1,10 @@
 import WorkspaceForm from "@/components/app/workspace/configure/WorkspaceForm";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/app-store";
 import { ConfigureScreen, useUIStore } from "@/stores/ui-store";
-import { useCallback } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { Trash2 } from "lucide-react";
+import { useState } from "react";
 
 function ConfigureWorkspaceScreen() {
   const screen = useUIStore((state) => state.screen) as ConfigureScreen;
@@ -10,12 +13,23 @@ function ConfigureWorkspaceScreen() {
     appData?.find((workspace) => workspace.name === screen.workspaceName),
   );
 
-  const handlePrimaryAction = useCallback(function () {
-    console.log("Primary Action is clicked");
-  }, []);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  async function handleDeleteWorkspace() {
+    setIsDeleting(true);
+    try {
+      await invoke("delete_workspace", {
+        workspaceId: clonedWorkspaceConfig?.id,
+      });
+    } catch (err) {
+      console.error("Failed to delete workspace:", err);
+      // TODO: Show failure toast message or dialog
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   return (
-    // <WorkspaceConfiguration text={{ pageTitle: `Configure "${screen.workspaceName}" Workspace`, primaryActionText: "Save" }} handlePrimaryAction={handlePrimaryAction} workspaceConfig={clonedWorkspaceConfig} />
     <WorkspaceForm
       text={{
         pageTitle: `Configure "${screen.workspaceName}" Workspace`,
@@ -23,9 +37,18 @@ function ConfigureWorkspaceScreen() {
         primaryActionText: "Update",
         submittingFormText: "Updating workspace...",
       }}
-      initialData={{ id: "sdfhaksdjfh", name: "sdkakhjfadgi", launchers: [] }}
-      onCancel={() => {}}
-      onSuccess={() => {}}
+      initialData={clonedWorkspaceConfig}
+      onSubmit={() => {}}
+      additionalActions={
+        <Button
+          type="button"
+          variant="destructive"
+          disabled={isDeleting}
+          onClick={handleDeleteWorkspace}
+        >
+          <Trash2 /> {isDeleting ? "Deleting..." : "Delete Workspace"}
+        </Button>
+      }
     />
   );
 }
