@@ -1,0 +1,5 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "workspace-launcher (Development Mode)",
+  "identifier": "com.nag.workspace.launcher.dev"
+}
