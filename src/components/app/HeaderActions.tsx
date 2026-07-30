@@ -1,8 +1,9 @@
 import { SaveIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import GoToHomeScreenButton from "./GoToHomeScreenButton";
+import { PropsWithChildren } from "react";
 
-interface HeaderActionsProps {
+interface HeaderActionsProps extends PropsWithChildren {
   actionButtonText: string;
   isSubmitting?: boolean;
   submittingText?: string;
@@ -14,6 +15,7 @@ function HeaderActions({
   isSubmitting,
   submittingText,
   handleAction,
+  children,
 }: HeaderActionsProps) {
   return (
     <div className="flex gap-4">
@@ -23,6 +25,7 @@ function HeaderActions({
         <SaveIcon />{" "}
         {isSubmitting ? (submittingText ?? "Saving...") : actionButtonText}
       </Button>
+      {children}
     </div>
   );
 }
