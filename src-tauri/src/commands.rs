@@ -138,6 +138,54 @@ pub async fn create_workspace(
 }
 
 #[tauri::command]
+pub async fn delete_workspace(
+    workspace_id: String,
+    app_handle: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), String> {
+    println!("Delete workspace with workspace ID: {:?}", workspace_id);
+
+    let mut data = state.data.lock().unwrap();
+
+    let app_state = data.as_mut().ok_or("Application data not loaded")?;
+
+    // Check if the workspace exists in the state
+    let target_index = app_state.data.iter().position(|l| l.id == workspace_id);
+
+    match target_index {
+        Some(index) => {
+            app_state.data.remove(index);
+        }
+        None => {
+            return Err(format!(
+                "Workspace with ID '{}' does not exist or already deleted.",
+                workspace_id
+            ));
+        }
+    }
+
+    // Save the updated state back to the file
+    let path = match app_handle.path().app_data_dir() {
+        Ok(mut dir) => {
+            dir.push("app_state.json");
+            dir
+        }
+        Err(e) => {
+            eprintln!("[Error] Failed to get application data directory: {}", e);
+            return Err(format!("Failed to get application data directory: {}", e));
+        }
+    };
+
+    match std::fs::write(&path, serde_json::to_string_pretty(&app_state).unwrap()) {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            eprintln!("[Error] Failed to write to file at {:?}: {}", path, e);
+            Err(format!("Failed to save application data: {}", e))
+        }
+    }
+}
+
+#[tauri::command]
 pub async fn launch_workspace(name: String, state: State<'_, AppState>) -> Result<(), String> {
     let data = state.data.lock().unwrap();
     let app_state = data.as_ref().ok_or("Application data not loaded")?;

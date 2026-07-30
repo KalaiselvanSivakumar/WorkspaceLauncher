@@ -23,6 +23,7 @@ pub fn run() {
             commands::pick_folder,
             commands::fetch_chrome_profiles,
             commands::create_workspace,
+            commands::delete_workspace,
             commands::launch_workspace
         ])
         .run(tauri::generate_context!())
