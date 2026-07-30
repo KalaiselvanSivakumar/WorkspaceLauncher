@@ -95,6 +95,17 @@ pub struct ChromeProfileDto {
     pub full_name: String,
 }
 
+// Implementations
+impl From<CreateWorkspacePayload> for WorkspaceConfig {
+    fn from(payload: CreateWorkspacePayload) -> Self {
+        Self {
+            id: uuid::Uuid::new_v4().to_string(),
+            name: payload.name,
+            launchers: payload.launchers,
+        }
+    }
+}
+
 impl From<&ChromeProfile> for ChromeProfileDto {
     fn from(profile: &ChromeProfile) -> Self {
         Self {
