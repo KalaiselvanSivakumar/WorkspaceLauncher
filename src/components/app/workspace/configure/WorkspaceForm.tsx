@@ -70,6 +70,17 @@ export default function WorkspaceForm({
   } = useFieldArray({
     control,
     name: "launchers",
+    rules: {
+      required: "At least one launcher is required",
+      minLength: {
+        value: 1,
+        message: "At least one launcher is required",
+      },
+      maxLength: {
+        value: MAX_LAUNCHERS_PER_WORKSPACE,
+        message: `Maximum ${MAX_LAUNCHERS_PER_WORKSPACE} launchers allowed per workspace`,
+      },
+    },
   });
 
   // Fetch dynamic Chrome profiles on mount
@@ -181,6 +192,14 @@ export default function WorkspaceForm({
                 type="text"
                 {...register("name", {
                   required: "Workspace name is required",
+                  minLength: {
+                    value: 5,
+                    message: "Name should be at least 5 characters long",
+                  },
+                  maxLength: {
+                    value: 30,
+                    message: "Name should not be more than 30 characters long",
+                  },
                 })}
               />
               {errors.name && <FieldError>{errors.name.message}</FieldError>}
@@ -244,6 +263,12 @@ export default function WorkspaceForm({
                 </ButtonGroup>
               </div>
             </div>
+
+            {errors.launchers && (
+              <FieldError>
+                {errors.launchers.root?.message || errors.launchers.message}
+              </FieldError>
+            )}
 
             {/* Dynamic Launcher Cards */}
             <div className="grid grid-cols-1 gap-4">

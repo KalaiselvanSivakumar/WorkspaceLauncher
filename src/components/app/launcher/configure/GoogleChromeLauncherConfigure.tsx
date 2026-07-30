@@ -81,6 +81,7 @@ function GoogleChromeLauncherConfigure({
               {...register(
                 `launchers.${launcherIndex}.links.${urlIdx}.url` as const,
                 { required: true },
+                // TODO: URL validation is needed here
               )}
             />
             <Button
