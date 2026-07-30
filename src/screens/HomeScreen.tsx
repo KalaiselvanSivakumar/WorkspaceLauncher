@@ -8,7 +8,8 @@ import CreateWorkspaceButton from "@/components/app/CreateWorkspaceButton";
 
 function HomeScreen() {
   const appStore = useAppStore();
-  const { isLoading, data, error, loadData } = appStore;
+  // TODO: Show errors to the user
+  const { isLoading, data, loadData } = appStore;
   const [filterWorkspaceName, setFilterWorkspaceName] = useState("");
 
   useEffect(() => {
