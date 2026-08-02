@@ -5,6 +5,7 @@ use crate::{
     models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher},
     state::AppState,
     vscode::execute_vscode_launcher,
+    fs_utils::{read_json_file, write_json_file, APP_STATE_FILENAME},
 };
 
 #[tauri::command]
@@ -27,52 +28,15 @@ pub async fn fetch_chrome_profiles() -> Result<Vec<ChromeProfileDto>, String> {
         .collect())
 }
 
-fn load_application_data(app_handle: AppHandle) -> Result<AppStateData, String> {
-    // 1. Retrieve the application data directory
-    let mut path = match app_handle.path().app_data_dir() {
-        Ok(dir) => dir,
-        Err(e) => {
-            eprintln!("[Error] Failed to get application data directory: {}", e);
-            return Err(format!("Failed to get application data directory: {}", e));
-        }
-    };
-
-    path.push("app_state.json");
-
-    // 2. Check if the file exists
-    if !path.exists() {
-        println!("[Info] app_state.json does not exist yet. Returning empty object.");
-        return Ok(AppStateData::default());
-    }
-
-    // 3. Read the file contents
-    let file_content = match std::fs::read_to_string(&path) {
-        Ok(content) => content,
-        Err(e) => {
-            eprintln!("[Error] Failed to read file at {:?}: {}", path, e);
-            return Err(format!("Failed to read application data file: {}", e));
-        }
-    };
-
-    // 4. Parse the string into valid JSON
-    match serde_json::from_str::<AppStateData>(&file_content) {
-        Ok(json) => Ok(json),
-        Err(e) => {
-            eprintln!(
-                "[Error] Failed to parse JSON from file: {}. File might be corrupted.",
-                e
-            );
-            Err(format!("Application data file is corrupted: {}", e))
-        }
-    }
-}
+// The JSON read/write logic has been moved to crate::fs_utils::{read_json_file, write_json_file}
+// This keeps file I/O and error handling consistent and reusable (also useful for future change_log.json usage).
 
 #[tauri::command]
 pub async fn get_application_data(
     app_handle: AppHandle,
     state: State<'_, AppState>,
 ) -> Result<AppStateData, String> {
-    let data = load_application_data(app_handle)?;
+    let data = read_json_file::<AppStateData>(&app_handle, APP_STATE_FILENAME)?;
 
     // Store in Rust memory
     let mut stored_data = state.data.lock().unwrap();
@@ -118,24 +82,12 @@ pub async fn create_workspace(
     app_state.data.push(payload.into());
 
     // Save the updated state back to the file
-    let path = match app_handle.path().app_data_dir() {
-        Ok(mut dir) => {
-            dir.push("app_state.json");
-            dir
-        }
-        Err(e) => {
-            eprintln!("[Error] Failed to get application data directory: {}", e);
-            return Err(format!("Failed to get application data directory: {}", e));
-        }
-    };
-
-    match std::fs::write(&path, serde_json::to_string_pretty(&app_state).unwrap()) {
-        Ok(_) => Ok(()),
-        Err(e) => {
-            eprintln!("[Error] Failed to write to file at {:?}: {}", path, e);
-            Err(format!("Failed to save application data: {}", e))
-        }
+    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &app_state) {
+        eprintln!("[Error] {}", e);
+        return Err(format!("Failed to save application data: {}", e));
     }
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -166,24 +118,12 @@ pub async fn delete_workspace(
     }
 
     // Save the updated state back to the file
-    let path = match app_handle.path().app_data_dir() {
-        Ok(mut dir) => {
-            dir.push("app_state.json");
-            dir
-        }
-        Err(e) => {
-            eprintln!("[Error] Failed to get application data directory: {}", e);
-            return Err(format!("Failed to get application data directory: {}", e));
-        }
-    };
-
-    match std::fs::write(&path, serde_json::to_string_pretty(&app_state).unwrap()) {
-        Ok(_) => Ok(()),
-        Err(e) => {
-            eprintln!("[Error] Failed to write to file at {:?}: {}", path, e);
-            Err(format!("Failed to save application data: {}", e))
-        }
+    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &app_state) {
+        eprintln!("[Error] {}", e);
+        return Err(format!("Failed to save application data: {}", e));
     }
+
+    Ok(())
 }
 
 #[tauri::command]
