@@ -9,6 +9,8 @@ pub mod state;
 
 pub mod chrome;
 
+pub mod vscode;
+
 pub mod commands;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
