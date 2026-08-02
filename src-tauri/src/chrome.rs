@@ -1,3 +1,4 @@
+use std::process::Command;
 use std::{fs, path::PathBuf};
 
 use crate::models::{ChromeLauncher, ChromeProfile, LauncherAction};
@@ -140,13 +141,11 @@ pub fn execute_chrome_launcher(chrome_launcher: &ChromeLauncher) -> Result<Strin
                 .map(|link| link.url.clone())
                 .collect();
 
+            let mut args = vec![new_window_arg, profile_arg];
+            args.extend(urls);
+
             #[cfg(target_os = "windows")]
             {
-                use std::process::Command;
-
-                let mut args = vec![new_window_arg, profile_arg];
-                args.extend(urls);
-
                 // Attempt 1: Try executing via native PATH lookup
                 if Command::new("chrome.exe").args(&args).spawn().is_err() {
                     // Attempt 2: If PATH fails, read the absolute installation path from registry
@@ -161,6 +160,21 @@ pub fn execute_chrome_launcher(chrome_launcher: &ChromeLauncher) -> Result<Strin
                         );
                     }
                 }
+            }
+
+            #[cfg(target_os = "macos")]
+            {
+                // -a specifies the application name
+                Command::new("open")
+                    .args(["-n", "-a", "Google Chrome", "--args"])
+                    .args(&args)
+                    .spawn()
+                    .map_err(|e| e.to_string())?;
+            }
+
+            #[cfg(not(any(target_os = "windows", target_os = "macos")))]
+            {
+                Err("This launcher does not support the current operating system".to_string())
             }
         }
     }
