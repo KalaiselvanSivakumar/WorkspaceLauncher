@@ -4,6 +4,7 @@ use crate::{
     chrome::{execute_chrome_launcher, get_chrome_profiles},
     models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher},
     state::AppState,
+    vscode::execute_vscode_launcher,
 };
 
 #[tauri::command]
@@ -201,15 +202,14 @@ pub async fn launch_workspace(name: String, state: State<'_, AppState>) -> Resul
     for launcher in &launcher_config.launchers {
         match launcher {
             Launcher::Chrome(chrome_launcher) => {
-                let result = execute_chrome_launcher(chrome_launcher);
+                if let Err(err) = execute_chrome_launcher(chrome_launcher) {
+                    println!("Failed to launch Chrome: {}", err);
+                }
             }
             Launcher::VsCode(vscode_launcher) => {
-                // Launch VS Code with the specified action and path
-                // Implement the logic to launch VS Code here
-                println!(
-                    "Launching VS Code with action: {:?}, path: {:?}",
-                    vscode_launcher.action, vscode_launcher.path
-                );
+                if let Err(err) = execute_vscode_launcher(vscode_launcher) {
+                    println!("Failed to launch VS Code: {}", err);
+                }
             }
         }
     }
