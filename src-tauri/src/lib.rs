@@ -5,6 +5,8 @@ use crate::state::AppState;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 pub mod models;
 
+pub mod fs_utils;
+
 pub mod state;
 
 pub mod chrome;
