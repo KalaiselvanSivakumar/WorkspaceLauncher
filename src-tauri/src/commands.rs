@@ -1,11 +1,11 @@
-use tauri::{AppHandle, Manager, State, Window};
+use tauri::{AppHandle, State, Window};
 
 use crate::{
     chrome::{execute_chrome_launcher, get_chrome_profiles},
+    fs_utils::{read_json_file, write_json_file, APP_STATE_FILENAME},
     models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher},
     state::AppState,
     vscode::execute_vscode_launcher,
-    fs_utils::{read_json_file, write_json_file, APP_STATE_FILENAME},
 };
 
 #[tauri::command]
