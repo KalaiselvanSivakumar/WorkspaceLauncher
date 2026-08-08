@@ -1,13 +1,8 @@
 use serde::{de::DeserializeOwned, Serialize};
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 use tauri::{AppHandle, Manager};
 
-// Centralized filename constants for JSON files used by the application.
-// This avoids scattering literal filenames across the codebase and makes
-// renaming files easier and less error-prone.
-pub const APP_STATE_FILENAME: &str = "app_state.json";
-
-pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+use crate::{constants::APP_STATE_FILENAME, models::AppStateData};
 
 /// Return the application data directory or an error message.
 fn app_data_dir(app_handle: &AppHandle) -> Result<PathBuf, String> {
@@ -15,6 +10,13 @@ fn app_data_dir(app_handle: &AppHandle) -> Result<PathBuf, String> {
         .path()
         .app_data_dir()
         .map_err(|e| format!("Failed to get application data directory: {}", e))
+}
+
+/// Checks if a file exists inside the app data directory.
+fn file_exists(app_handle: &AppHandle, filename: &str) -> Result<bool, String> {
+    let mut dir = app_data_dir(app_handle)?;
+    dir.push(filename);
+    Ok(dir.exists())
 }
 
 /// Read a JSON file from the app data dir into T. If the file doesn't exist, return T::default().
@@ -57,4 +59,35 @@ pub fn write_json_file<T: Serialize>(
     std::fs::write(&dir, serialized)
         .map(|_| ())
         .map_err(|e| format!("Failed to write to file at {:?}: {}", dir, e))
+}
+
+/// Ensures the application data directory exists, creating it and any parents if missing.
+fn ensure_app_data_dir(app_handle: &AppHandle) -> Result<PathBuf, String> {
+    let dir = app_data_dir(app_handle)?;
+    if !dir.exists() {
+        fs::create_dir_all(&dir)
+            .map_err(|e| format!("Failed to create application directory at {:?}: {}", dir, e))?;
+    }
+    Ok(dir)
+}
+
+/// Set the default application state in the app data directory, overwriting any existing state.
+fn reset_app_state(app_handle: &AppHandle) -> Result<(), String> {
+    let default_state = AppStateData::default();
+
+    write_json_file(app_handle, APP_STATE_FILENAME, &default_state)?;
+
+    Ok(())
+}
+
+/// Check if the application state file exists, and if not, create it with default content.
+pub fn check_and_initialize_app_state(app_handle: &AppHandle) -> Result<(), String> {
+    ensure_app_data_dir(app_handle)?;
+
+    if !file_exists(app_handle, APP_STATE_FILENAME)? {
+        // If the file doesn't exist, create it with default content
+        reset_app_state(app_handle)?;
+    }
+
+    Ok(())
 }
