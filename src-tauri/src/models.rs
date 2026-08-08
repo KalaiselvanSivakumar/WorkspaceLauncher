@@ -83,7 +83,6 @@ pub struct CreateWorkspacePayload {
     pub launchers: Vec<Launcher>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChromeProfile {
     pub profile_name: String,
     pub name: String,
