@@ -27,6 +27,11 @@ pub fn read_json_file<T: DeserializeOwned + Default>(
 
     if !dir.exists() {
         // File not present yet -> return default
+        eprintln!(
+            "[Warning] File {:?} does not exist. Returning default value for type {}.",
+            dir,
+            std::any::type_name::<T>()
+        );
         return Ok(T::default());
     }
 
