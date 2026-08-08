@@ -67,7 +67,7 @@ pub struct Link {
     pub url: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/models.ts")]
 pub struct AppStateData {
     pub app_version: String,
@@ -96,7 +96,17 @@ pub struct ChromeProfileDto {
     pub full_name: String,
 }
 
-// Implementations
+// Implementations - Default Traits
+impl Default for AppStateData {
+    fn default() -> Self {
+        Self {
+            app_version: APP_VERSION.to_string(),
+            data: Vec::new(),
+        }
+    }
+}
+
+// Implementations - `From` Traits for Conversions
 impl From<CreateWorkspacePayload> for WorkspaceConfig {
     fn from(payload: CreateWorkspacePayload) -> Self {
         Self {
