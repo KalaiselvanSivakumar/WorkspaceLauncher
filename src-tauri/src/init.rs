@@ -5,6 +5,7 @@ use tauri::{AppHandle, Manager};
 use crate::{
     constants::APP_STATE_FILENAME,
     fs_utils::{check_and_initialize_app_state, read_json_file},
+    migrations,
     state::AppState,
 };
 
@@ -16,8 +17,10 @@ pub fn setup_app(app_handle: &AppHandle) -> Result<()> {
 
     let loaded_state = read_json_file(app_handle, APP_STATE_FILENAME)?;
 
+    let migrated_state = migrations::migrate_app_state_if_needed(app_handle, loaded_state)?;
+
     app_handle.manage(AppState {
-        config: Mutex::new(loaded_state),
+        config: Mutex::new(migrated_state),
     });
 
     Ok(())
