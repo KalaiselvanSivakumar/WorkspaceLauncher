@@ -1,5 +1,5 @@
 use serde::{de::DeserializeOwned, Serialize};
-use std::{fs, path::PathBuf};
+use std::{fs, io::Write, path::PathBuf};
 use tauri::{AppHandle, Manager};
 
 use crate::{constants::APP_STATE_FILENAME, models::AppStateData};
@@ -50,15 +50,44 @@ pub fn write_json_file<T: Serialize>(
     filename: &str,
     data: &T,
 ) -> Result<(), String> {
-    let mut dir = app_data_dir(app_handle)?;
-    dir.push(filename);
+    let dir = app_data_dir(app_handle)?;
+
+    let target_file_path = dir.join(filename);
+    let temp_file_path = dir.join(format!("{}.tmp", filename));
 
     let serialized = serde_json::to_string_pretty(data)
         .map_err(|e| format!("Failed to serialize data to JSON: {}", e))?;
 
-    std::fs::write(&dir, serialized)
-        .map(|_| ())
-        .map_err(|e| format!("Failed to write to file at {:?}: {}", dir, e))
+    let mut temp_file = fs::File::create(&temp_file_path).map_err(|e| {
+        format!(
+            "Failed to create temporary file at {:?}: {}",
+            temp_file_path, e
+        )
+    })?;
+    temp_file.write_all(serialized.as_bytes()).map_err(|e| {
+        format!(
+            "Failed to write data to temp file at {:?}: {}",
+            temp_file_path, e
+        )
+    })?;
+
+    temp_file.sync_all().map_err(|e| {
+        format!(
+            "Failed to sync data to disk for {:?}: {}",
+            temp_file_path, e
+        )
+    })?;
+
+    fs::rename(&temp_file_path, &target_file_path).map_err(|e| {
+        let _ = fs::remove_file(&temp_file_path);
+
+        format!(
+            "Failed to atomically rename temp file {:?} to target file {:?}: {}",
+            temp_file_path, target_file_path, e
+        )
+    })?;
+
+    Ok(())
 }
 
 /// Ensures the application data directory exists, creating it and any parents if missing.
