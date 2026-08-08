@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::constants::APP_VERSION;
+
 // Launcher data models for the application. These models are used to represent the configuration and state of the application, including launchers, tab groups, and links. The `TS` derive macro is used to generate TypeScript definitions for these models, allowing for seamless integration between Rust and TypeScript codebases.
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
