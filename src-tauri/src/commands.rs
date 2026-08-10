@@ -6,6 +6,7 @@ use crate::{
     fs_utils::write_json_file,
     models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher},
     state::AppState,
+    utils::normalize_name,
     vscode::execute_vscode_launcher,
 };
 
@@ -50,14 +51,6 @@ pub async fn create_workspace(
         .config
         .lock()
         .map_err(|e| format!("Failed to lock application state: {}", e))?;
-
-    // Helper closure to normalize names by removing whitespace and lowercasing
-    let normalize_name = |name: &str| -> String {
-        name.split_whitespace()
-            .collect::<Vec<&str>>()
-            .join("")
-            .to_lowercase()
-    };
 
     // Check if the workspace already exists in the state
     if app_state

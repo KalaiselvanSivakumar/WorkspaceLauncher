@@ -5,6 +5,7 @@ pub mod fs_utils;
 pub mod migrations;
 pub mod models;
 pub mod state;
+pub mod utils;
 pub mod vscode;
 
 mod init;
