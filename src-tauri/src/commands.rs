@@ -2,7 +2,8 @@ use tauri::{AppHandle, State, Window};
 
 use crate::{
     chrome::{execute_chrome_launcher, get_chrome_profiles},
-    fs_utils::{read_json_file, write_json_file, APP_STATE_FILENAME},
+    constants::APP_STATE_FILENAME,
+    fs_utils::write_json_file,
     models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher},
     state::AppState,
     vscode::execute_vscode_launcher,
@@ -28,22 +29,13 @@ pub async fn fetch_chrome_profiles() -> Result<Vec<ChromeProfileDto>, String> {
         .collect())
 }
 
-// The JSON read/write logic has been moved to crate::fs_utils::{read_json_file, write_json_file}
-// This keeps file I/O and error handling consistent and reusable (also useful for future change_log.json usage).
-
 #[tauri::command]
-pub async fn get_application_data(
-    app_handle: AppHandle,
-    state: State<'_, AppState>,
-) -> Result<AppStateData, String> {
-    let data = read_json_file::<AppStateData>(&app_handle, APP_STATE_FILENAME)?;
-
-    // Store in Rust memory
-    let mut stored_data = state.data.lock().unwrap();
-    *stored_data = Some(data.clone());
-
-    // Return to frontend
-    Ok(data)
+pub async fn get_application_data(state: State<'_, AppState>) -> Result<AppStateData, String> {
+    let stored_data = state
+        .config
+        .lock()
+        .map_err(|e| format!("Failed to acquire state lock : {}", e))?;
+    Ok(stored_data.clone())
 }
 
 #[tauri::command]
@@ -54,9 +46,10 @@ pub async fn create_workspace(
 ) -> Result<(), String> {
     println!("Received workspace creation payload: {:?}", payload);
 
-    let mut data = state.data.lock().unwrap();
-
-    let app_state = data.as_mut().ok_or("Application data not loaded")?;
+    let mut app_state = state
+        .config
+        .lock()
+        .map_err(|e| format!("Failed to lock application state: {}", e))?;
 
     // Helper closure to normalize names by removing whitespace and lowercasing
     let normalize_name = |name: &str| -> String {
@@ -82,7 +75,7 @@ pub async fn create_workspace(
     app_state.data.push(payload.into());
 
     // Save the updated state back to the file
-    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &app_state) {
+    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &*app_state) {
         eprintln!("[Error] {}", e);
         return Err(format!("Failed to save application data: {}", e));
     }
@@ -98,9 +91,10 @@ pub async fn delete_workspace(
 ) -> Result<(), String> {
     println!("Delete workspace with workspace ID: {:?}", workspace_id);
 
-    let mut data = state.data.lock().unwrap();
-
-    let app_state = data.as_mut().ok_or("Application data not loaded")?;
+    let mut app_state = state
+        .config
+        .lock()
+        .map_err(|e| format!("Failed to lock application state: {}", e))?;
 
     // Check if the workspace exists in the state
     let target_index = app_state.data.iter().position(|l| l.id == workspace_id);
@@ -118,7 +112,7 @@ pub async fn delete_workspace(
     }
 
     // Save the updated state back to the file
-    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &app_state) {
+    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &*app_state) {
         eprintln!("[Error] {}", e);
         return Err(format!("Failed to save application data: {}", e));
     }
@@ -128,8 +122,10 @@ pub async fn delete_workspace(
 
 #[tauri::command]
 pub async fn launch_workspace(name: String, state: State<'_, AppState>) -> Result<(), String> {
-    let data = state.data.lock().unwrap();
-    let app_state = data.as_ref().ok_or("Application data not loaded")?;
+    let app_state = state
+        .config
+        .lock()
+        .map_err(|e| format!("Failed to lock application state: {}", e))?;
 
     // Find the launcher configuration by name
     let launcher_config = app_state

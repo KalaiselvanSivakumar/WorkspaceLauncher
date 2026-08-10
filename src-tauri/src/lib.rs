@@ -1,26 +1,21 @@
-use std::sync::Mutex;
-
-use crate::state::AppState;
-
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-pub mod models;
-
-pub mod fs_utils;
-
-pub mod state;
-
 pub mod chrome;
-
+pub mod commands;
+pub mod constants;
+pub mod fs_utils;
+pub mod migrations;
+pub mod models;
+pub mod state;
 pub mod vscode;
 
-pub mod commands;
+mod init;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(AppState {
-            data: Mutex::new(None),
+        .setup(|app| {
+            init::setup_app(app.handle())?;
+            Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             commands::get_application_data,

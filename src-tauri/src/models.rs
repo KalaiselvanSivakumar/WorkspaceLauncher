@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::constants::APP_VERSION;
+
 // Launcher data models for the application. These models are used to represent the configuration and state of the application, including launchers, tab groups, and links. The `TS` derive macro is used to generate TypeScript definitions for these models, allowing for seamless integration between Rust and TypeScript codebases.
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -67,7 +69,7 @@ pub struct Link {
     pub url: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/models.ts")]
 pub struct AppStateData {
     pub app_version: String,
@@ -81,7 +83,6 @@ pub struct CreateWorkspacePayload {
     pub launchers: Vec<Launcher>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChromeProfile {
     pub profile_name: String,
     pub name: String,
@@ -96,7 +97,17 @@ pub struct ChromeProfileDto {
     pub full_name: String,
 }
 
-// Implementations
+// Implementations - Default Traits
+impl Default for AppStateData {
+    fn default() -> Self {
+        Self {
+            app_version: APP_VERSION.to_string(),
+            data: Vec::new(),
+        }
+    }
+}
+
+// Implementations - `From` Traits for Conversions
 impl From<CreateWorkspacePayload> for WorkspaceConfig {
     fn from(payload: CreateWorkspacePayload) -> Self {
         Self {

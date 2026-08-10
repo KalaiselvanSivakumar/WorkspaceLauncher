@@ -16,7 +16,7 @@ type AppState = AppStoreState & AppStoreActions;
 
 export const useAppStore = create<AppState>((set) => ({
   isLoading: true,
-  data: { data: [] },
+  data: { app_version: "", data: [] },
   error: null,
 
   loadData: async () => {
