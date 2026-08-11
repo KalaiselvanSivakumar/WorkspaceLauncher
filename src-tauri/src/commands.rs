@@ -3,8 +3,9 @@ use tauri::{AppHandle, State, Window};
 use crate::{
     chrome::{execute_chrome_launcher, get_chrome_profiles},
     constants::APP_STATE_FILENAME,
+    errors::{AppError, CmdResult},
     fs_utils::write_json_file,
-    models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher},
+    models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher, WorkspaceConfig},
     state::AppState,
     utils::normalize_name,
     vscode::execute_vscode_launcher,
@@ -52,11 +53,13 @@ pub async fn create_workspace(
         .lock()
         .map_err(|e| format!("Failed to lock application state: {}", e))?;
 
+    let normalized_payload_name = normalize_name(&payload.name);
+
     // Check if the workspace already exists in the state
     if app_state
         .data
         .iter()
-        .any(|l| normalize_name(&l.name) == normalize_name(&payload.name))
+        .any(|l| normalize_name(&l.name) == normalized_payload_name)
     {
         return Err(format!(
             "Workspace with name '{}' already exists.",
@@ -71,6 +74,55 @@ pub async fn create_workspace(
     if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &*app_state) {
         eprintln!("[Error] {}", e);
         return Err(format!("Failed to save application data: {}", e));
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn update_workspace(
+    payload: WorkspaceConfig,
+    app_handle: AppHandle,
+    state: State<'_, AppState>,
+) -> CmdResult<()> {
+    println!("Received update workspace payload: {:?}", payload);
+
+    let mut app_state = state.config.lock().map_err(|e| AppError::RuntimeError {
+        details: format!("Failed to lock application state: {}", e),
+    })?;
+
+    let normalized_payload_name = normalize_name(&payload.name);
+
+    // Check if the workspace already exists in the state
+    if app_state
+        .data
+        .iter()
+        .any(|l| normalize_name(&l.name) == normalized_payload_name && l.id != payload.id)
+    {
+        return Err(AppError::InvalidConfiguration {
+            field: "name".to_string(),
+            reason: format!("Workspace with name '{}' already exists.", payload.name),
+            field_label: Some("Workspace Name".to_string()),
+        });
+    }
+
+    if let Some(workspace) = app_state.data.iter_mut().find(|l| l.id == payload.id) {
+        *workspace = payload;
+    } else {
+        return Err(AppError::InvalidConfiguration {
+            field: "id".to_string(),
+            reason: format!("Workspace with ID '{}' does not exist.", payload.id),
+            field_label: None,
+        });
+    }
+
+    // Save the updated state back to the file
+    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &*app_state) {
+        eprintln!("[Error] {}", e);
+        return Err(AppError::IoError {
+            path: APP_STATE_FILENAME.to_string(),
+            details: format!("Failed to save application data: {}", e),
+        });
     }
 
     Ok(())
