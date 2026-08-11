@@ -1,6 +1,7 @@
 pub mod chrome;
 pub mod commands;
 pub mod constants;
+pub mod errors;
 pub mod fs_utils;
 pub mod migrations;
 pub mod models;
