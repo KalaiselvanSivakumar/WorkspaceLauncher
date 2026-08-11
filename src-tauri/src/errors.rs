@@ -1,9 +1,9 @@
-use serde::{ser::SerializeStruct, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 use thiserror::Error;
 use ts_rs::TS;
 
-#[derive(Debug, Error, TS)]
-#[ts(export, export_to = "../../src/types/models.ts")]
+#[derive(Debug, Error, Deserialize, TS)]
+#[ts(tag = "type", export, export_to = "../../src/types/models.ts")]
 pub enum AppError {
     /// Represents an error that occurs when the application fails to start.
     #[error("Startup error: {details}")]
@@ -43,6 +43,19 @@ pub enum AppError {
 }
 
 impl AppError {
+    pub fn variant_name(&self) -> &'static str {
+        match self {
+            AppError::StartupError { .. } => "StartupError",
+            AppError::RuntimeError { .. } => "RuntimeError",
+            AppError::ResourceNotFound { .. } => "ResourceNotFound",
+            AppError::InvalidInput { .. } => "InvalidInput",
+            AppError::GenericError { .. } => "GenericError",
+            AppError::InvalidConfiguration { .. } => "InvalidConfiguration",
+            AppError::IoError { .. } => "IoError",
+            AppError::DeserializationError { .. } => "DeserializationError",
+        }
+    }
+
     pub fn field_display_name(&self) -> &str {
         match self {
             AppError::InvalidConfiguration {
@@ -63,24 +76,17 @@ impl Serialize for AppError {
         // Allocate space for type, formatted message, and up to 2 payload fields
         let mut state = serializer.serialize_struct("AppError", 4)?;
 
-        state.serialize_field("type", &format!("{:?}", self))?;
+        state.serialize_field("type", self.variant_name())?;
 
         state.serialize_field("message", &self.to_string())?;
 
         match self {
-            AppError::StartupError { details } => {
-                state.serialize_field("details", details)?;
-            }
-            AppError::RuntimeError { details } => {
-                state.serialize_field("details", details)?;
-            }
-            AppError::ResourceNotFound { details } => {
-                state.serialize_field("details", details)?;
-            }
-            AppError::InvalidInput { details } => {
-                state.serialize_field("details", details)?;
-            }
-            AppError::GenericError { details } => {
+            AppError::StartupError { details }
+            | AppError::RuntimeError { details }
+            | AppError::ResourceNotFound { details }
+            | AppError::InvalidInput { details }
+            | AppError::GenericError { details }
+            | AppError::DeserializationError { details } => {
                 state.serialize_field("details", details)?;
             }
             AppError::InvalidConfiguration {
@@ -94,9 +100,6 @@ impl Serialize for AppError {
             }
             AppError::IoError { path, details } => {
                 state.serialize_field("path", path)?;
-                state.serialize_field("details", details)?;
-            }
-            AppError::DeserializationError { details } => {
                 state.serialize_field("details", details)?;
             }
         }
