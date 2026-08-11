@@ -1,4 +1,6 @@
-import WorkspaceForm from "@/components/app/workspace/configure/WorkspaceForm";
+import WorkspaceForm, {
+  WorkspaceFormData,
+} from "@/components/app/workspace/configure/WorkspaceForm";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/app-store";
 import { ConfigureScreen, useUIStore } from "@/stores/ui-store";
@@ -14,6 +16,15 @@ function ConfigureWorkspaceScreen() {
   );
 
   const [isDeleting, setIsDeleting] = useState(false);
+
+  async function onSubmit(data: WorkspaceFormData) {
+    console.log(data);
+    try {
+      await invoke("update_workspace", { payload: data });
+    } catch (err) {
+      console.error("Failed to update workspace:", err);
+    }
+  }
 
   async function handleDeleteWorkspace() {
     setIsDeleting(true);
@@ -38,7 +49,7 @@ function ConfigureWorkspaceScreen() {
         submittingFormText: "Updating workspace...",
       }}
       initialData={clonedWorkspaceConfig}
-      onSubmit={() => {}}
+      onSubmit={onSubmit}
       additionalActions={
         <Button
           type="button"
