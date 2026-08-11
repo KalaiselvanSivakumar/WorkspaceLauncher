@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 export type ConfigureScreen = { type: "configure"; workspaceName: string };
 
-type Screen = { type: "home" } | { type: "create" } | ConfigureScreen;
+export type Screen = { type: "home" } | { type: "create" } | ConfigureScreen;
 
 interface UIStoreState {
   screen: Screen;
