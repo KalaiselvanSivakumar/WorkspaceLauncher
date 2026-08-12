@@ -4,14 +4,8 @@ import { invoke } from "@tauri-apps/api/core";
 
 function CreateWorkspaceScreen() {
   async function onSubmit(data: CreateWorkspacePayload) {
-    console.log(data);
-    try {
-      await invoke("create_workspace", { payload: data });
-      // TODO: Return back to home screen, show success message toast, scroll to newly created workspace
-    } catch (err) {
-      console.error("Failed to save workspace:", err);
-      // TODO: Show failure toast message or dialog
-    }
+    await invoke("create_workspace", { payload: data });
+    // TODO: Return back to home screen, show success message toast, scroll to newly created workspace
   }
 
   return (

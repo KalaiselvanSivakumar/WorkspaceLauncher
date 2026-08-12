@@ -4,11 +4,9 @@ import WorkspaceForm, {
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/app-store";
 import { ConfigureScreen, useUIStore } from "@/stores/ui-store";
-import { AppError } from "@/types/AppErrorExt";
 import { invoke } from "@tauri-apps/api/core";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 function ConfigureWorkspaceScreen() {
   const screen = useUIStore((state) => state.screen) as ConfigureScreen;
@@ -20,16 +18,7 @@ function ConfigureWorkspaceScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function onSubmit(data: WorkspaceFormData) {
-    console.log(data);
-    try {
-      await invoke("update_workspace", { payload: data });
-    } catch (err) {
-      console.error("Failed to update workspace:", err);
-      const error = err as AppError;
-      if (error.type) {
-        toast.error(error.message);
-      }
-    }
+    await invoke("update_workspace", { payload: data });
   }
 
   async function handleDeleteWorkspace() {
