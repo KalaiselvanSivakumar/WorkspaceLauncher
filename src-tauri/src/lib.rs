@@ -7,6 +7,7 @@ pub mod migrations;
 pub mod models;
 pub mod state;
 pub mod utils;
+pub mod validations;
 pub mod vscode;
 
 mod init;

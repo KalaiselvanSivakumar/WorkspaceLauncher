@@ -5,5 +5,35 @@ pub const APP_STATE_FILENAME: &str = "app_state.json";
 
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// Constants related to the frontend of the application, such as field names used in forms and other UI elements. These constants help maintain consistency between the frontend and backend, especially when validating user input or handling form submissions.
+pub struct FrontendConstants;
+
+impl FrontendConstants {
+    pub fn workspace_form_field_name() -> String {
+        "name".to_string()
+    }
+
+    pub fn workspace_form_field_label_name() -> String {
+        "Workspace Name".to_string()
+    }
+
+    pub fn workspace_form_field_id() -> String {
+        "id".to_string()
+    }
+}
+
+/// Validation constants for IPC commands and other parts of the application. These constants define limits and constraints for various fields, ensuring consistent validation across the application.
+pub struct ValidationConstants;
+
+impl ValidationConstants {
+    pub fn workspace_name_min_length() -> usize {
+        5
+    }
+
+    pub fn workspace_name_max_length() -> usize {
+        50
+    }
+}
+
 #[cfg(target_os = "windows")]
 pub const CREATE_NO_WINDOW: u32 = 0x08000000;
