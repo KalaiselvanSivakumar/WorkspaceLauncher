@@ -1,4 +1,6 @@
-import WorkspaceForm from "@/components/app/workspace/configure/WorkspaceForm";
+import WorkspaceForm, {
+  WorkspaceFormData,
+} from "@/components/app/workspace/configure/WorkspaceForm";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/app-store";
 import { ConfigureScreen, useUIStore } from "@/stores/ui-store";
@@ -14,6 +16,10 @@ function ConfigureWorkspaceScreen() {
   );
 
   const [isDeleting, setIsDeleting] = useState(false);
+
+  async function onSubmit(data: WorkspaceFormData) {
+    await invoke("update_workspace", { payload: data });
+  }
 
   async function handleDeleteWorkspace() {
     setIsDeleting(true);
@@ -35,10 +41,10 @@ function ConfigureWorkspaceScreen() {
         pageTitle: `Configure "${screen.workspaceName}" Workspace`,
         pageDescription: "Modify your launcher configurations.",
         primaryActionText: "Update",
-        submittingFormText: "Updating workspace...",
+        submittingFormText: "Updating...",
       }}
       initialData={clonedWorkspaceConfig}
-      onSubmit={() => {}}
+      onSubmit={onSubmit}
       additionalActions={
         <Button
           type="button"

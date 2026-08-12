@@ -20,6 +20,8 @@ import { Chrome, VisualStudioCode } from "@dev.icons/react";
 import LauncherCard from "../../launcher/view/LauncherCard";
 import GoogleChromeLauncherConfigure from "../../launcher/configure/GoogleChromeLauncherConfigure";
 import VisualStudioCodeLauncherConfigure from "../../launcher/configure/VisualStudioCodeLauncherConfigure";
+import { AppError } from "@/types/AppErrorExt";
+import { toast } from "sonner";
 
 export interface WorkspaceFormData {
   id?: string;
@@ -36,7 +38,7 @@ interface WorkspaceFormProps {
   };
   initialData?: WorkspaceFormData;
   additionalActions?: JSX.Element;
-  onSubmit: (data: WorkspaceFormData) => void;
+  onSubmit: (data: WorkspaceFormData) => Promise<void>;
 }
 
 export default function WorkspaceForm({
@@ -54,6 +56,8 @@ export default function WorkspaceForm({
     setValue,
     getValues,
     watch,
+    setError,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<WorkspaceFormData>({
     defaultValues: initialData || {
@@ -147,13 +151,34 @@ export default function WorkspaceForm({
     });
   };
 
+  const onSubmitHandler = async (data: WorkspaceFormData) => {
+    console.log(data);
+    try {
+      await onSubmit(data);
+    } catch (err) {
+      console.error("Operation failed:", err);
+      const error = err as AppError;
+      if (error.type) {
+        toast.error(error.message);
+      }
+      if (error.type === "InvalidConfiguration") {
+        setError(error.field as any, {
+          type: "server",
+          message: error.reason,
+        });
+
+        setFocus(error.field as any);
+      }
+    }
+  };
+
   const launchersCount = launcherFields.length;
   const disableAddLauncherAction =
     launchersCount >= MAX_LAUNCHERS_PER_WORKSPACE;
 
   return (
     <main>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmitHandler)}>
         <PageHeader
           title={text.pageTitle}
           showBackAction
@@ -185,8 +210,8 @@ export default function WorkspaceForm({
                     message: "Name should be at least 5 characters long",
                   },
                   maxLength: {
-                    value: 30,
-                    message: "Name should not be more than 30 characters long",
+                    value: 50,
+                    message: "Name should not be more than 50 characters long",
                   },
                 })}
               />

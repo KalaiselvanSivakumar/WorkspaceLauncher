@@ -14,7 +14,7 @@ function PageHeader({
   showBackAction = false,
 }: PageHeaderProps) {
   return (
-    <div className="border-b border-border flex justify-between items-center px-6 py-4">
+    <div className="sticky top-0 z-10 bg-background border-b border-border flex justify-between items-center px-6 py-4">
       <div className="flex gap-2 items-center">
         {showBackAction && <GoToHomeScreenButton variant="icon" />}
         <div>

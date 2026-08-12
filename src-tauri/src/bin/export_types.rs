@@ -1,7 +1,10 @@
 use ts_rs::{Config, TS};
-use workspace_launcher_lib::models::{
-    AppStateData, ChromeLauncher, ChromeProfileDto, CreateWorkspacePayload, Launcher,
-    LauncherAction, Link, TabGroup, VsCodeLauncher, WorkspaceConfig,
+use workspace_launcher_lib::{
+    errors::AppError,
+    models::{
+        AppStateData, ChromeLauncher, ChromeProfileDto, CreateWorkspacePayload, Launcher,
+        LauncherAction, Link, TabGroup, VsCodeLauncher, WorkspaceConfig,
+    },
 };
 
 fn main() {
@@ -19,4 +22,7 @@ fn main() {
 
     // Chrome Profiles
     ChromeProfileDto::export(&config).unwrap();
+
+    // Errors
+    AppError::export(&config).unwrap();
 }

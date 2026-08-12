@@ -1,10 +1,13 @@
 pub mod chrome;
 pub mod commands;
 pub mod constants;
+pub mod errors;
 pub mod fs_utils;
 pub mod migrations;
 pub mod models;
 pub mod state;
+pub mod utils;
+pub mod validations;
 pub mod vscode;
 
 mod init;
@@ -22,6 +25,7 @@ pub fn run() {
             commands::pick_folder,
             commands::fetch_chrome_profiles,
             commands::create_workspace,
+            commands::update_workspace,
             commands::delete_workspace,
             commands::launch_workspace
         ])
