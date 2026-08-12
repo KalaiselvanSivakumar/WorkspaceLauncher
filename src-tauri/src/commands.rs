@@ -7,7 +7,7 @@ use crate::{
     fs_utils::write_json_file,
     models::{AppStateData, ChromeProfileDto, CreateWorkspacePayload, Launcher, WorkspaceConfig},
     state::AppState,
-    utils::normalize_name,
+    validations::{validate_workspace_name, validate_workspace_name_uniqueness},
     vscode::execute_vscode_launcher,
 };
 
@@ -31,6 +31,27 @@ pub async fn fetch_chrome_profiles() -> Result<Vec<ChromeProfileDto>, String> {
         .collect())
 }
 
+// Helper: Handles locking state, mutating data, saving atomically to disk, and handling lock errors
+fn mutate_and_save_app_state<F>(
+    app_handle: &AppHandle,
+    state: &State<'_, AppState>,
+    mutate: F,
+) -> CmdResult<()>
+where
+    F: FnOnce(&mut Vec<WorkspaceConfig>) -> CmdResult<()>,
+{
+    let mut app_state = state.config.lock().map_err(|e| AppError::RuntimeError {
+        details: format!("Failed to lock application state: {}", e),
+    })?;
+
+    mutate(&mut app_state.data)?;
+
+    write_json_file(app_handle, APP_STATE_FILENAME, &*app_state).map_err(|e| AppError::IoError {
+        path: APP_STATE_FILENAME.to_string(),
+        details: format!("Failed to save application data: {}", e),
+    })
+}
+
 #[tauri::command]
 pub async fn get_application_data(state: State<'_, AppState>) -> Result<AppStateData, String> {
     let stored_data = state
@@ -45,38 +66,15 @@ pub async fn create_workspace(
     payload: CreateWorkspacePayload,
     app_handle: AppHandle,
     state: State<'_, AppState>,
-) -> Result<(), String> {
+) -> CmdResult<()> {
     println!("Received workspace creation payload: {:?}", payload);
 
-    let mut app_state = state
-        .config
-        .lock()
-        .map_err(|e| format!("Failed to lock application state: {}", e))?;
-
-    let normalized_payload_name = normalize_name(&payload.name);
-
-    // Check if the workspace already exists in the state
-    if app_state
-        .data
-        .iter()
-        .any(|l| normalize_name(&l.name) == normalized_payload_name)
-    {
-        return Err(format!(
-            "Workspace with name '{}' already exists.",
-            payload.name
-        ));
-    }
-
-    // Create WorkspaceConfig from CreateWorkspacePayload
-    app_state.data.push(payload.into());
-
-    // Save the updated state back to the file
-    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &*app_state) {
-        eprintln!("[Error] {}", e);
-        return Err(format!("Failed to save application data: {}", e));
-    }
-
-    Ok(())
+    mutate_and_save_app_state(&app_handle, &state, |data| {
+        validate_workspace_name(&payload.name)?;
+        validate_workspace_name_uniqueness(data, &payload.name, None)?;
+        data.push(payload.into());
+        Ok(())
+    })
 }
 
 #[tauri::command]
@@ -87,45 +85,21 @@ pub async fn update_workspace(
 ) -> CmdResult<()> {
     println!("Received update workspace payload: {:?}", payload);
 
-    let mut app_state = state.config.lock().map_err(|e| AppError::RuntimeError {
-        details: format!("Failed to lock application state: {}", e),
-    })?;
+    mutate_and_save_app_state(&app_handle, &state, |data| {
+        validate_workspace_name(&payload.name)?;
+        validate_workspace_name_uniqueness(data, &payload.name, Some(&payload.id))?;
 
-    let normalized_payload_name = normalize_name(&payload.name);
-
-    // Check if the workspace already exists in the state
-    if app_state
-        .data
-        .iter()
-        .any(|l| normalize_name(&l.name) == normalized_payload_name && l.id != payload.id)
-    {
-        return Err(AppError::InvalidConfiguration {
-            field: "name".to_string(),
-            reason: format!("Workspace with name '{}' already exists.", payload.name),
-            field_label: Some("Workspace Name".to_string()),
-        });
-    }
-
-    if let Some(workspace) = app_state.data.iter_mut().find(|l| l.id == payload.id) {
-        *workspace = payload;
-    } else {
-        return Err(AppError::InvalidConfiguration {
-            field: "id".to_string(),
-            reason: format!("Workspace with ID '{}' does not exist.", payload.id),
-            field_label: None,
-        });
-    }
-
-    // Save the updated state back to the file
-    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &*app_state) {
-        eprintln!("[Error] {}", e);
-        return Err(AppError::IoError {
-            path: APP_STATE_FILENAME.to_string(),
-            details: format!("Failed to save application data: {}", e),
-        });
-    }
-
-    Ok(())
+        if let Some(workspace) = data.iter_mut().find(|l| l.id == payload.id) {
+            *workspace = payload;
+            Ok(())
+        } else {
+            return Err(AppError::InvalidConfiguration {
+                field: "id".to_string(),
+                reason: format!("Workspace with ID '{}' does not exist.", payload.id),
+                field_label: None,
+            });
+        }
+    })
 }
 
 #[tauri::command]
@@ -133,36 +107,24 @@ pub async fn delete_workspace(
     workspace_id: String,
     app_handle: AppHandle,
     state: State<'_, AppState>,
-) -> Result<(), String> {
+) -> CmdResult<()> {
     println!("Delete workspace with workspace ID: {:?}", workspace_id);
 
-    let mut app_state = state
-        .config
-        .lock()
-        .map_err(|e| format!("Failed to lock application state: {}", e))?;
-
-    // Check if the workspace exists in the state
-    let target_index = app_state.data.iter().position(|l| l.id == workspace_id);
-
-    match target_index {
-        Some(index) => {
-            app_state.data.remove(index);
+    mutate_and_save_app_state(&app_handle, &state, |data| {
+        if let Some(target_position) = data.iter_mut().position(|l| l.id == workspace_id) {
+            data.remove(target_position);
+            Ok(())
+        } else {
+            return Err(AppError::InvalidConfiguration {
+                field: "id".to_string(),
+                reason: format!(
+                    "Workspace with ID '{}' does not exist or already deleted",
+                    workspace_id
+                ),
+                field_label: None,
+            });
         }
-        None => {
-            return Err(format!(
-                "Workspace with ID '{}' does not exist or already deleted.",
-                workspace_id
-            ));
-        }
-    }
-
-    // Save the updated state back to the file
-    if let Err(e) = write_json_file(&app_handle, APP_STATE_FILENAME, &*app_state) {
-        eprintln!("[Error] {}", e);
-        return Err(format!("Failed to save application data: {}", e));
-    }
-
-    Ok(())
+    })
 }
 
 #[tauri::command]
