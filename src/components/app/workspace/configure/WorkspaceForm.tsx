@@ -210,8 +210,8 @@ export default function WorkspaceForm({
                     message: "Name should be at least 5 characters long",
                   },
                   maxLength: {
-                    value: 30,
-                    message: "Name should not be more than 30 characters long",
+                    value: 50,
+                    message: "Name should not be more than 50 characters long",
                   },
                 })}
               />
