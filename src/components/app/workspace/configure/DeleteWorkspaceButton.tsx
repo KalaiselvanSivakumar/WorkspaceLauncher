@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useRedirectStore } from "@/stores/redirect-store";
+import { useUIStore } from "@/stores/ui-store";
 import { invoke } from "@tauri-apps/api/core";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -22,6 +23,7 @@ interface DeleteWorkspaceButtonProps {
 
 function DeleteWorkspaceButton({ workspaceId }: DeleteWorkspaceButtonProps) {
   const isRedirecting = useRedirectStore((state) => state.isRedirecting);
+  const showHome = useUIStore((state) => state.showHome);
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -35,6 +37,7 @@ function DeleteWorkspaceButton({ workspaceId }: DeleteWorkspaceButtonProps) {
         workspaceId: workspaceId,
       });
       setOpen(false);
+      showHome();
     } catch (err) {
       console.error("Failed to delete workspace:", err);
       // TODO: Show failure toast message or dialog
