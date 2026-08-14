@@ -32,24 +32,28 @@ pub async fn fetch_chrome_profiles() -> Result<Vec<ChromeProfileDto>, String> {
 }
 
 // Helper: Handles locking state, mutating data, saving atomically to disk, and handling lock errors
-fn mutate_and_save_app_state<F>(
+fn mutate_and_save_app_state<F, T>(
     app_handle: &AppHandle,
     state: &State<'_, AppState>,
     mutate: F,
-) -> CmdResult<()>
+) -> CmdResult<T>
 where
-    F: FnOnce(&mut Vec<WorkspaceConfig>) -> CmdResult<()>,
+    F: FnOnce(&mut Vec<WorkspaceConfig>) -> CmdResult<T>,
 {
     let mut app_state = state.config.lock().map_err(|e| AppError::RuntimeError {
         details: format!("Failed to lock application state: {}", e),
     })?;
 
-    mutate(&mut app_state.data)?;
+    let result = mutate(&mut app_state.data)?;
 
-    write_json_file(app_handle, APP_STATE_FILENAME, &*app_state).map_err(|e| AppError::IoError {
-        path: APP_STATE_FILENAME.to_string(),
-        details: format!("Failed to save application data: {}", e),
-    })
+    write_json_file(app_handle, APP_STATE_FILENAME, &*app_state).map_err(|e| {
+        AppError::IoError {
+            path: APP_STATE_FILENAME.to_string(),
+            details: format!("Failed to save application data: {}", e),
+        }
+    })?;
+
+    Ok(result)
 }
 
 #[tauri::command]
@@ -66,14 +70,16 @@ pub async fn create_workspace(
     payload: CreateWorkspacePayload,
     app_handle: AppHandle,
     state: State<'_, AppState>,
-) -> CmdResult<()> {
+) -> CmdResult<WorkspaceConfig> {
     println!("Received workspace creation payload: {:?}", payload);
 
     mutate_and_save_app_state(&app_handle, &state, |data| {
         validate_workspace_name(&payload.name)?;
         validate_workspace_name_uniqueness(data, &payload.name, None)?;
-        data.push(payload.into());
-        Ok(())
+
+        let new_workspace: WorkspaceConfig = payload.into();
+        data.push(new_workspace.clone());
+        Ok(new_workspace)
     })
 }
 
@@ -82,7 +88,7 @@ pub async fn update_workspace(
     payload: WorkspaceConfig,
     app_handle: AppHandle,
     state: State<'_, AppState>,
-) -> CmdResult<()> {
+) -> CmdResult<WorkspaceConfig> {
     println!("Received update workspace payload: {:?}", payload);
 
     mutate_and_save_app_state(&app_handle, &state, |data| {
@@ -90,8 +96,9 @@ pub async fn update_workspace(
         validate_workspace_name_uniqueness(data, &payload.name, Some(&payload.id))?;
 
         if let Some(workspace) = data.iter_mut().find(|l| l.id == payload.id) {
+            let updated_workspace = payload.clone();
             *workspace = payload;
-            Ok(())
+            Ok(updated_workspace)
         } else {
             return Err(AppError::InvalidConfiguration {
                 field: "id".to_string(),
