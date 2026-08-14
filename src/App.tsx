@@ -1,8 +1,8 @@
 import { Screen, useUIStore } from "./stores/ui-store";
-import { Toaster } from "sonner";
 import HomeScreen from "./screens/HomeScreen";
 import CreateWorkspaceScreen from "./screens/CreateWorkspaceScreen";
 import ConfigureWorkspaceScreen from "./screens/ConfigureWorkspaceScreen";
+import StyledToaster from "./components/ui/StyledToast";
 
 function getScreenComponent(screenType: Screen["type"]) {
   switch (screenType) {
@@ -25,7 +25,7 @@ function App() {
   return (
     <>
       {screenComponent}
-      <Toaster expand position="top-center" duration={6000} />
+      <StyledToaster expand position="top-center" duration={6000} />
     </>
   );
 }
