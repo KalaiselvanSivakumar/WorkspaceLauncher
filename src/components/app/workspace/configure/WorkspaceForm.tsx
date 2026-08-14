@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { JSX, useEffect, useState } from "react";
-import { ChromeProfileDto, Launcher } from "@/types/models";
+import { ChromeProfileDto, Launcher, WorkspaceConfig } from "@/types/models";
 import { MAX_LAUNCHERS_PER_WORKSPACE } from "@/utils/launchers";
 import { Badge } from "@/components/ui/badge";
 import { ButtonGroup } from "@/components/ui/button-group";
@@ -22,6 +22,13 @@ import GoogleChromeLauncherConfigure from "../../launcher/configure/GoogleChrome
 import VisualStudioCodeLauncherConfigure from "../../launcher/configure/VisualStudioCodeLauncherConfigure";
 import { AppError } from "@/types/AppErrorExt";
 import { toast } from "sonner";
+import {
+  navigateToHomeAndScrollToWorkspace,
+  showRedirectSuccessToast,
+} from "@/components/ui/helperFunctions";
+import { useRedirectStore } from "@/stores/redirect-store";
+import { useAppStore } from "@/stores/app-store";
+import { useUIStore } from "@/stores/ui-store";
 
 export interface WorkspaceFormData {
   id?: string;
@@ -36,18 +43,27 @@ interface WorkspaceFormProps {
     primaryActionText: string;
     submittingFormText: string;
   };
+  isCreate: boolean;
   initialData?: WorkspaceFormData;
   additionalActions?: JSX.Element;
-  onSubmit: (data: WorkspaceFormData) => Promise<void>;
+  onSubmit: (data: WorkspaceFormData) => Promise<WorkspaceConfig>;
+
+  onCancelRedirection: (workspaceId: WorkspaceConfig["id"]) => void;
 }
 
 export default function WorkspaceForm({
   text,
+  isCreate,
   initialData,
   additionalActions,
   onSubmit,
+  onCancelRedirection,
 }: WorkspaceFormProps) {
   const [chromeProfiles, setChromeProfiles] = useState<ChromeProfileDto[]>([]);
+
+  const { startRedirect, clearRedirect } = useRedirectStore();
+  const showHome = useUIStore((state) => state.showHome);
+  const updateDataInStore = useAppStore((state) => state.updateData);
 
   const {
     register,
@@ -99,6 +115,10 @@ export default function WorkspaceForm({
       }
     }
     loadProfiles();
+  }, []);
+
+  useEffect(() => {
+    return () => clearRedirect();
   }, []);
 
   const watchedLaunchers = watch("launchers");
@@ -154,9 +174,28 @@ export default function WorkspaceForm({
   const onSubmitHandler = async (data: WorkspaceFormData) => {
     console.log(data);
     try {
-      await onSubmit(data);
+      const response = await onSubmit(data);
+
+      startRedirect(`workspace-${isCreate ? "create" : "edit"}-${response.id}`);
+
+      showRedirectSuccessToast({
+        message: isCreate
+          ? "Workspace created successfully!"
+          : "Workspace updated successfully!",
+        onRedirect: () => {
+          console.log("Redirectinggggggg....");
+          showHome();
+          navigateToHomeAndScrollToWorkspace(response.id);
+        },
+        onCancel: () => {
+          clearRedirect();
+          onCancelRedirection(response.id);
+        },
+      });
+      updateDataInStore(response);
     } catch (err) {
       console.error("Operation failed:", err);
+      clearRedirect();
       const error = err as AppError;
       if (error.type) {
         toast.error(error.message);

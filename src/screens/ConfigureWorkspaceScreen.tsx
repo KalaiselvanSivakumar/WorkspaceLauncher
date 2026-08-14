@@ -1,12 +1,11 @@
+import DeleteWorkspaceButton from "@/components/app/workspace/configure/DeleteWorkspaceButton";
 import WorkspaceForm, {
   WorkspaceFormData,
 } from "@/components/app/workspace/configure/WorkspaceForm";
-import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/app-store";
 import { ConfigureScreen, useUIStore } from "@/stores/ui-store";
+import { WorkspaceConfig } from "@/types/models";
 import { invoke } from "@tauri-apps/api/core";
-import { Trash2 } from "lucide-react";
-import { useState } from "react";
 
 function ConfigureWorkspaceScreen() {
   const screen = useUIStore((state) => state.screen) as ConfigureScreen;
@@ -16,25 +15,14 @@ function ConfigureWorkspaceScreen() {
     appData?.find((workspace) => workspace.id === screen.id),
   );
 
-  const [isDeleting, setIsDeleting] = useState(false);
-
   async function onSubmit(data: WorkspaceFormData) {
-    await invoke("update_workspace", { payload: data });
+    let response: WorkspaceConfig = await invoke("update_workspace", {
+      payload: data,
+    });
+    return response;
   }
 
-  async function handleDeleteWorkspace() {
-    setIsDeleting(true);
-    try {
-      await invoke("delete_workspace", {
-        workspaceId: clonedWorkspaceConfig?.id,
-      });
-    } catch (err) {
-      console.error("Failed to delete workspace:", err);
-      // TODO: Show failure toast message or dialog
-    } finally {
-      setIsDeleting(false);
-    }
-  }
+  function onCancelRedirection(workspaceId: WorkspaceConfig["id"]) {}
 
   return (
     <WorkspaceForm
@@ -44,18 +32,13 @@ function ConfigureWorkspaceScreen() {
         primaryActionText: "Update",
         submittingFormText: "Updating...",
       }}
+      isCreate={false}
       initialData={clonedWorkspaceConfig}
       onSubmit={onSubmit}
       additionalActions={
-        <Button
-          type="button"
-          variant="destructive"
-          disabled={isDeleting}
-          onClick={handleDeleteWorkspace}
-        >
-          <Trash2 /> {isDeleting ? "Deleting..." : "Delete Workspace"}
-        </Button>
+        <DeleteWorkspaceButton workspaceId={clonedWorkspaceConfig?.id ?? ""} />
       }
+      onCancelRedirection={onCancelRedirection}
     />
   );
 }
