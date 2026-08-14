@@ -9,6 +9,7 @@ import { useUIStore } from "@/stores/ui-store";
 import LauncherCard from "./launcher/view/LauncherCard";
 import { getActionsCountFromLaunchers } from "@/utils/launchers";
 import AppLauncherInfo from "./launcher/view/AppLauncherInfo";
+import { getWorkspaceCardId } from "../ui/helperFunctions";
 
 interface WorkspaceCardProps {
   readonly workspaceConfig: WorkspaceConfig;
@@ -27,7 +28,7 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
   const showConfigure = useUIStore((state) => state.showConfigure);
 
   return (
-    <Card>
+    <Card id={getWorkspaceCardId(workspaceConfig.id)}>
       <div className="flex items-center justify-between px-6">
         <div className="flex items-start flex-col gap-2">
           <h3 className="text-base font-medium">{workspaceConfig.name}</h3>

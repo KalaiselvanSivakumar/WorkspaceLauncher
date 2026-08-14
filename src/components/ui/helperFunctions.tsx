@@ -6,3 +6,7 @@ export function showRedirectSuccessToast(config: RedirectToastConfig) {
     duration: Infinity,
   });
 }
+
+export function getWorkspaceCardId(workspaceId: string) {
+  return `workspace-card-${workspaceId}`;
+}
