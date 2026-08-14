@@ -53,7 +53,7 @@ function WorkspaceCard({ workspaceConfig }: WorkspaceCardProps) {
             type="button"
             variant="outline"
             className="gap-1"
-            onClick={() => showConfigure(workspaceConfig.name)}
+            onClick={() => showConfigure(workspaceConfig.id)}
           >
             <PencilIcon /> Configure
           </Button>

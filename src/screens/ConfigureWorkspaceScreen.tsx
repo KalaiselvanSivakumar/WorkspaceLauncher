@@ -11,8 +11,9 @@ import { useState } from "react";
 function ConfigureWorkspaceScreen() {
   const screen = useUIStore((state) => state.screen) as ConfigureScreen;
   const appData = useAppStore((state) => state.data.data);
+
   const clonedWorkspaceConfig = structuredClone(
-    appData?.find((workspace) => workspace.name === screen.workspaceName),
+    appData?.find((workspace) => workspace.id === screen.id),
   );
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -38,7 +39,7 @@ function ConfigureWorkspaceScreen() {
   return (
     <WorkspaceForm
       text={{
-        pageTitle: `Configure "${screen.workspaceName}" Workspace`,
+        pageTitle: `Configure "${clonedWorkspaceConfig?.name ?? "NAME MISSING"}" Workspace`,
         pageDescription: "Modify your launcher configurations.",
         primaryActionText: "Update",
         submittingFormText: "Updating...",
