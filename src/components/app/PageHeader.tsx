@@ -1,5 +1,6 @@
 import React from "react";
 import GoToHomeScreenButton from "./GoToHomeScreenButton";
+import { useRedirectStore } from "@/stores/redirect-store";
 
 interface PageHeaderProps extends React.PropsWithChildren {
   title: string;
@@ -13,10 +14,14 @@ function PageHeader({
   children,
   showBackAction = false,
 }: PageHeaderProps) {
+  const isRedirecting = useRedirectStore((state) => state.isRedirecting);
+
   return (
     <div className="sticky top-0 z-10 bg-background border-b border-border flex justify-between items-center px-6 py-4">
       <div className="flex gap-2 items-center">
-        {showBackAction && <GoToHomeScreenButton variant="icon" />}
+        {showBackAction && (
+          <GoToHomeScreenButton variant="icon" isDisabled={isRedirecting} />
+        )}
         <div>
           <h1 className="font-semibold text-xl">{title}</h1>
           {description && (

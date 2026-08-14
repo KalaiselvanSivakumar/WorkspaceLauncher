@@ -1,11 +1,21 @@
 import WorkspaceForm from "@/components/app/workspace/configure/WorkspaceForm";
-import { CreateWorkspacePayload } from "@/types/models";
+import { useUIStore } from "@/stores/ui-store";
+import { CreateWorkspacePayload, WorkspaceConfig } from "@/types/models";
 import { invoke } from "@tauri-apps/api/core";
 
+async function onSubmit(data: CreateWorkspacePayload) {
+  const response: WorkspaceConfig = await invoke("create_workspace", {
+    payload: data,
+  });
+  return response;
+}
+
 function CreateWorkspaceScreen() {
-  async function onSubmit(data: CreateWorkspacePayload) {
-    await invoke("create_workspace", { payload: data });
-    // TODO: Return back to home screen, show success message toast, scroll to newly created workspace
+  const showConfigure = useUIStore((state) => state.showConfigure);
+
+  function onCancelRedirection(workspaceId: WorkspaceConfig["id"]) {
+    console.log("Create wizard success cancelling...");
+    showConfigure(workspaceId);
   }
 
   return (
@@ -16,7 +26,9 @@ function CreateWorkspaceScreen() {
         pageDescription: "Configure launchers and paths for your workspace.",
         submittingFormText: "Creating workspace...",
       }}
+      isCreate={true}
       onSubmit={onSubmit}
+      onCancelRedirection={onCancelRedirection}
     />
   );
 }

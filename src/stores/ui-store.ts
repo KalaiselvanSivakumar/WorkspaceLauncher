@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ConfigureScreen = { type: "configure"; workspaceName: string };
+export type ConfigureScreen = { type: "configure"; id: string };
 
 export type Screen = { type: "home" } | { type: "create" } | ConfigureScreen;
 
@@ -11,7 +11,7 @@ interface UIStoreState {
 interface UIStoreActions {
   showHome(): void;
   showCreate(): void;
-  showConfigure(workspaceName: string): void;
+  showConfigure(id: string): void;
 }
 
 type UIState = UIStoreState & UIStoreActions;
@@ -21,6 +21,5 @@ export const useUIStore = create<UIState>((set) => ({
 
   showHome: () => set({ screen: { type: "home" } }),
   showCreate: () => set({ screen: { type: "create" } }),
-  showConfigure: (workspaceName: string) =>
-    set({ screen: { type: "configure", workspaceName } }),
+  showConfigure: (id: string) => set({ screen: { type: "configure", id } }),
 }));
