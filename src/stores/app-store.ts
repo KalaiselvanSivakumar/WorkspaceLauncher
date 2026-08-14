@@ -48,7 +48,6 @@ export const useAppStore = create<AppState>((set, get) => ({
           workspaceConfig.id === workspace.id ? workspace : workspaceConfig,
         )
       : [...workspaces, workspace];
-    console.log("Updating data in store");
     set({ data: { ...state.data, data: updatedWorkspaces } });
   },
 }));
