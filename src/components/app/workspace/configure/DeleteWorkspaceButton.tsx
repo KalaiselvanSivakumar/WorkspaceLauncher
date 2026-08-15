@@ -13,9 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRedirectStore } from "@/stores/redirect-store";
 import { useUIStore } from "@/stores/ui-store";
+import { WorkspaceConfig } from "@/types/models";
 import { invoke } from "@tauri-apps/api/core";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface DeleteWorkspaceButtonProps {
   workspaceId: string;
@@ -33,14 +35,18 @@ function DeleteWorkspaceButton({ workspaceId }: DeleteWorkspaceButtonProps) {
   async function handleDeleteWorkspace() {
     setIsDeleting(true);
     try {
-      await invoke("delete_workspace", {
+      const response: WorkspaceConfig = await invoke("delete_workspace", {
         workspaceId: workspaceId,
       });
       setOpen(false);
+      toast.success(`Workspace named "${response.name}" deleted successfully!`);
       showHome();
     } catch (err) {
       console.error("Failed to delete workspace:", err);
-      // TODO: Show failure toast message or dialog
+      setOpen(false);
+      toast.error(
+        `Error occured while deleting the workspace. Please try again.`,
+      );
     } finally {
       setIsDeleting(false);
     }
