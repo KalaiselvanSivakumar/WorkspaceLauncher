@@ -114,13 +114,13 @@ pub async fn delete_workspace(
     workspace_id: String,
     app_handle: AppHandle,
     state: State<'_, AppState>,
-) -> CmdResult<()> {
+) -> CmdResult<WorkspaceConfig> {
     println!("Delete workspace with workspace ID: {:?}", workspace_id);
 
     mutate_and_save_app_state(&app_handle, &state, |data| {
         if let Some(target_position) = data.iter_mut().position(|l| l.id == workspace_id) {
-            data.remove(target_position);
-            Ok(())
+            let removed_workspace = data.remove(target_position);
+            Ok(removed_workspace)
         } else {
             return Err(AppError::InvalidConfiguration {
                 field: "id".to_string(),
