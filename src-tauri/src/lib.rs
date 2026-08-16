@@ -1,4 +1,5 @@
 pub mod chrome;
+pub mod cmd_utils;
 pub mod commands;
 pub mod constants;
 pub mod errors;
