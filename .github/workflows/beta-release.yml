@@ -1,0 +1,55 @@
+name: Beta Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on tags like v1.0.0-beta.1, v0.1.0-beta.2
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest' # Apple Silicon (m1/m2/m3/m4)
+            args: '--target aarch64-apple-darwin'
+          - platform: 'windows-latest' # Windows x64
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm' # or pnpm / yarn depending on your setup
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Build Tauri Application
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: '${{ github.ref_name }} (Beta)'
+          releaseBody: 'See changelog for beta details.'
+          releaseDraft: true # Creates draft release so you can inspect before publishing
+          prerelease: true # Marks as Pre-release on GitHub
+          args: ${{ matrix.args }}
