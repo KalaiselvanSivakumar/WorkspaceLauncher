@@ -20,4 +20,4 @@ export type TabGroup = { name: string, color: string | null, };
 
 export type VsCodeLauncher = { action: LauncherAction, path: string | null, };
 
-export type WorkspaceConfig = { id: string, name: string, launchers: Array<Launcher>, };
+export type WorkspaceConfig = { id: string, name: string, launchers: Array<Launcher>, created_at: string, updated_at: string, };

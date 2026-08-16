@@ -96,9 +96,10 @@ pub async fn update_workspace(
         validate_workspace_name_uniqueness(data, &payload.name, Some(&payload.id))?;
 
         if let Some(workspace) = data.iter_mut().find(|l| l.id == payload.id) {
-            let updated_workspace = payload.clone();
-            *workspace = payload;
-            Ok(updated_workspace)
+            workspace.name = payload.name;
+            workspace.launchers = payload.launchers;
+            workspace.touch();
+            Ok(workspace.clone())
         } else {
             return Err(AppError::InvalidConfiguration {
                 field: "id".to_string(),

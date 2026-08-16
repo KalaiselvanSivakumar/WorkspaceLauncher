@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -11,6 +12,13 @@ pub struct WorkspaceConfig {
     pub id: String,
     pub name: String,
     pub launchers: Vec<Launcher>,
+
+    #[serde(default = "Utc::now")]
+    pub created_at: DateTime<Utc>,
+
+    #[serde(default = "Utc::now")]
+    pub updated_at: DateTime<Utc>,
+    // CAUTION: Any new properties added need to this struct need to be manually copied for update_workspace tauri command.
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -97,7 +105,7 @@ pub struct ChromeProfileDto {
     pub full_name: String,
 }
 
-// Implementations - Default Traits
+// Implementations
 impl Default for AppStateData {
     fn default() -> Self {
         Self {
@@ -107,13 +115,23 @@ impl Default for AppStateData {
     }
 }
 
+impl WorkspaceConfig {
+    pub fn touch(&mut self) {
+        self.updated_at = Utc::now();
+    }
+}
+
 // Implementations - `From` Traits for Conversions
 impl From<CreateWorkspacePayload> for WorkspaceConfig {
     fn from(payload: CreateWorkspacePayload) -> Self {
+        let now = Utc::now();
+
         Self {
             id: uuid::Uuid::new_v4().to_string(),
             name: payload.name,
             launchers: payload.launchers,
+            created_at: now,
+            updated_at: now,
         }
     }
 }
