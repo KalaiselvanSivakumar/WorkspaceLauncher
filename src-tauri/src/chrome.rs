@@ -1,6 +1,7 @@
 use std::process::Command;
 use std::{fs, path::PathBuf};
 
+use crate::cmd_utils::spawn_detached;
 use crate::constants::ValidationConstants;
 use crate::models::{ChromeLauncher, ChromeProfile, LauncherAction};
 
@@ -147,7 +148,6 @@ pub fn execute_chrome_launcher(chrome_launcher: &ChromeLauncher) -> Result<Strin
             #[cfg(target_os = "windows")]
             {
                 // Attempt 1: Try executing via native PATH lookup
-                use crate::cmd_utils::spawn_detached;
                 let mut cmd = Command::new("chrome.exe");
                 cmd.args(&args);
 
