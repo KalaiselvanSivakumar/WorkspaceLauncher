@@ -3,7 +3,7 @@ use std::process::Command;
 use crate::models::{LauncherAction, VsCodeLauncher};
 
 #[cfg(target_os = "windows")]
-use crate::constants::CREATE_NO_WINDOW;
+use crate::{cmd_utils::spawn_detached, constants::CREATE_NO_WINDOW};
 
 fn build_vscode_args(path: Option<&str>) -> Vec<String> {
     let mut args = Vec::new();
@@ -37,18 +37,15 @@ fn ensure_code_command_available() -> Result<(), String> {
 
 #[cfg(target_os = "windows")]
 fn launch_vscode(args: &[String]) -> Result<String, String> {
-    use std::os::windows::process::CommandExt;
+    // use std::os::windows::process::CommandExt;
 
     ensure_code_command_available()?;
 
     let mut command = Command::new("cmd");
-    command
-        .arg("/C")
-        .arg("code")
-        .args(args)
-        .creation_flags(CREATE_NO_WINDOW); // Prevents CMD window from appearing
+    command.arg("/C").arg("code").args(args);
+    // .creation_flags(CREATE_NO_WINDOW); // Prevents CMD window from appearing
 
-    match command.spawn() {
+    match spawn_detached(&mut command) {
         Ok(_) => Ok("Success".to_string()),
         Err(err) => Err(format!(
             "VS Code could not be launched. The 'code' command failed to start: {}",
