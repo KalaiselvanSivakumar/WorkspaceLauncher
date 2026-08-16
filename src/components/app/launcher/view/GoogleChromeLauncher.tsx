@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/item";
 import { CHROME_MAX_LINKS } from "@/utils/launchers";
 import { Link2Icon } from "lucide-react";
+import { SYSTEM_DEFAULT_PROFILE } from "../launcher-constants";
 
 interface GoogleChromeLauncherProps {
   launcher: ChromeLauncher;
@@ -21,7 +22,7 @@ function GoogleChromeLauncher({ launcher }: GoogleChromeLauncherProps) {
         <ViewFieldValuePair fieldName="Action" value={launcher.action} />
         <ViewFieldValuePair
           fieldName="Chrome Profile"
-          value={launcher.profile ?? " Default"}
+          value={launcher.profile ?? SYSTEM_DEFAULT_PROFILE}
         />
       </div>
       <Item className="p-0">

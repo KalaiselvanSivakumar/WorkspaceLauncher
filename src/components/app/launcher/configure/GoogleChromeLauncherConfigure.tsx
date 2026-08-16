@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import TargetsConfigureSectionHeader from "./TargetsConfigureSectionHeader";
 import { Input } from "@/components/ui/input";
+import { SYSTEM_DEFAULT_PROFILE } from "../launcher-constants";
 
 interface GoogleChromeLauncherConfigureProps {
   chromeProfiles: ChromeProfileDto[];
@@ -44,22 +45,24 @@ function GoogleChromeLauncherConfigure({
           <Controller
             control={control}
             name={`launchers.${launcherIndex}.profile` as const}
-            defaultValue={chromeProfiles[0]?.profile_name || "Default"}
+            defaultValue={SYSTEM_DEFAULT_PROFILE}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value || SYSTEM_DEFAULT_PROFILE}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Profile" />
                 </SelectTrigger>
                 <SelectContent>
-                  {chromeProfiles.length > 0 ? (
-                    chromeProfiles.map((prof) => (
-                      <SelectItem key={prof.full_name} value={prof.full_name}>
-                        {prof.full_name}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="Default">Default</SelectItem>
-                  )}
+                  <SelectItem value={SYSTEM_DEFAULT_PROFILE}>
+                    {SYSTEM_DEFAULT_PROFILE}
+                  </SelectItem>
+                  {chromeProfiles.map((prof) => (
+                    <SelectItem key={prof.full_name} value={prof.full_name}>
+                      {prof.full_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}

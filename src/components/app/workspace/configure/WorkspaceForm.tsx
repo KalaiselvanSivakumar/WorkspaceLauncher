@@ -29,6 +29,7 @@ import {
 import { useRedirectStore } from "@/stores/redirect-store";
 import { useAppStore } from "@/stores/app-store";
 import { useUIStore } from "@/stores/ui-store";
+import { SYSTEM_DEFAULT_PROFILE } from "../../launcher/launcher-constants";
 
 export interface WorkspaceFormData {
   id?: string;
@@ -284,7 +285,7 @@ export default function WorkspaceForm({
                     onClick={() =>
                       appendLauncher({
                         appName: "chrome",
-                        profile: chromeProfiles[0]?.profile_name || null,
+                        profile: SYSTEM_DEFAULT_PROFILE,
                         tab_group: null,
                         links: [],
                         action: "open",
