@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - platform: 'macos-latest' # Apple Silicon (m1/m2/m3/m4)
-            args: '--target aarch64-apple-darwin'
+            args: '--target universal-apple-darwin'
           - platform: 'windows-latest' # Windows x64
             args: ''
 
@@ -32,7 +32,7 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
@@ -43,13 +43,13 @@ jobs:
         run: npm ci
 
       - name: Build Tauri Application
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v0.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: '${{ github.ref_name }} (Beta)'
-          releaseBody: 'See changelog for beta details.'
+          releaseBody: 'Beta release for Windows (.exe) and macOS (Universal - Intel & Apple Silicon).'
           releaseDraft: true # Creates draft release so you can inspect before publishing
           prerelease: true # Marks as Pre-release on GitHub
           args: ${{ matrix.args }}
