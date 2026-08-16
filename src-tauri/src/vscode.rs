@@ -3,10 +3,13 @@ use std::process::Command;
 use crate::models::{LauncherAction, VsCodeLauncher};
 
 #[cfg(target_os = "windows")]
-use crate::{cmd_utils::spawn_detached, constants::CREATE_NO_WINDOW};
+use crate::constants::CREATE_NO_WINDOW;
+
+use crate::cmd_utils::spawn_detached;
 
 fn build_vscode_args(path: Option<&str>) -> Vec<String> {
     let mut args = Vec::new();
+    args.push("--new-window".to_string());
 
     if let Some(path) = path.filter(|path| !path.trim().is_empty()) {
         args.push(path.to_string());
@@ -25,6 +28,22 @@ fn ensure_code_command_available() -> Result<(), String> {
         .output()
         .map_err(|err| format!("Failed to check for the VS Code command: {}", err))?;
 
+    if output.status.success() {
+        Ok(())
+    } else {
+        Err(
+            "VS Code could not be launched because the 'code' command was not found in PATH."
+                .to_string(),
+        )
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn ensure_code_command_available() -> Result<(), String> {
+    let output = Command::new("which")
+        .arg("code")
+        .output()
+        .map_err(|err| format!("Failed to check for the VS Code command: {}", err))?;
     if output.status.success() {
         Ok(())
     } else {
@@ -54,7 +73,23 @@ fn launch_vscode(args: &[String]) -> Result<String, String> {
     }
 }
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(target_os = "macos")]
+fn launch_vscode(args: &[String]) -> Result<String, String> {
+    ensure_code_command_available()?;
+
+    let mut command = Command::new("code");
+    command.args(args);
+
+    match spawn_detached(&mut command) {
+        Ok(_) => Ok("Success".to_string()),
+        Err(err) => Err(format!(
+            "VS Code could not be launched. The 'code' command failed to start: {}",
+            err
+        )),
+    }
+}
+
+#[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
 fn launch_vscode(_args: &[String]) -> Result<String, String> {
     Err("VS Code is not supported on this platform.".to_string())
 }
