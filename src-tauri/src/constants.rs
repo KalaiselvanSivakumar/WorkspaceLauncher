@@ -1,3 +1,16 @@
+// Windows Process Creation Flags
+#[cfg(target_os = "windows")]
+pub const DETACHED_PROCESS: u32 = 0x00000008;
+
+#[cfg(target_os = "windows")]
+pub const CREATE_NEW_PROCESS_GROUP: u32 = 0x00020000;
+
+#[cfg(target_os = "windows")]
+pub const CREATE_BREAKAWAY_FROM_JOB: u32 = 0x01000000;
+
+#[cfg(target_os = "windows")]
+pub const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 // Centralized filename for JSON files used by the application to save application state.
 // This avoids scattering literal filenames across the codebase and makes
 // renaming files easier and less error-prone.
@@ -33,7 +46,8 @@ impl ValidationConstants {
     pub fn workspace_name_max_length() -> usize {
         50
     }
-}
 
-#[cfg(target_os = "windows")]
-pub const CREATE_NO_WINDOW: u32 = 0x08000000;
+    pub fn chrome_system_default_profile_front_end_value() -> String {
+        "-- System Default --".to_string()
+    }
+}

@@ -22,7 +22,7 @@ function ConfigureWorkspaceScreen() {
     return response;
   }
 
-  function onCancelRedirection(workspaceId: WorkspaceConfig["id"]) {}
+  function onCancelRedirection(_: WorkspaceConfig["id"]) {}
 
   return (
     <WorkspaceForm

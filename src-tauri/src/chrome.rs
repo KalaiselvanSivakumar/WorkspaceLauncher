@@ -1,6 +1,7 @@
 use std::process::Command;
 use std::{fs, path::PathBuf};
 
+use crate::constants::ValidationConstants;
 use crate::models::{ChromeLauncher, ChromeProfile, LauncherAction};
 
 pub fn get_chrome_profiles() -> Result<Vec<ChromeProfile>, String> {
@@ -91,8 +92,6 @@ fn get_chrome_path_from_registry() -> Option<String> {
 }
 
 pub fn execute_chrome_launcher(chrome_launcher: &ChromeLauncher) -> Result<String, String> {
-    // Launch Chrome with the specified action, profile, tab group, and links
-    // Implement the logic to launch Chrome here
     println!(
         "Launching Chrome with action: {:?}, profile: {:?}, tab group: {:?}, links: {:?}",
         chrome_launcher.action,
@@ -104,34 +103,36 @@ pub fn execute_chrome_launcher(chrome_launcher: &ChromeLauncher) -> Result<Strin
         LauncherAction::Open => {
             let chrome_profiles = get_chrome_profiles()
                 .map_err(|e| format!("Failed to get Chrome profiles: {}", e))?;
-            // print all chrome profiles
-            for chrome_profile in &chrome_profiles {
-                println!(
-                    "Found Chrome profile: {}, {}, {}, {}",
-                    chrome_profile.profile_name,
-                    chrome_profile.name,
-                    chrome_profile.full_name,
-                    chrome_profile.email
-                );
-            }
 
-            // 1. Verify the profile exists in Chrome's active profiles list
-            let target_profile = chrome_launcher.profile.as_deref().unwrap_or("Default");
-            let profile_exists = chrome_profiles
-                .iter()
-                .any(|chrome_profile| chrome_profile.profile_name == target_profile);
+            let default_profile_name =
+                ValidationConstants::chrome_system_default_profile_front_end_value();
 
-            // Throw an error immediately if the profile was not found on the machine
-            if !profile_exists {
-                return Err(format!(
-                    "The specified profile '{}' does not exist in Chrome.",
-                    target_profile
-                ));
-            }
-
-            // 2. Prepare the Arguments
-            let profile_arg = format!("--profile-directory={}", target_profile);
+            let target_profile_input = chrome_launcher
+                .profile
+                .as_deref()
+                .unwrap_or(&default_profile_name);
             let new_window_arg = "--new-window".to_string();
+            let mut args = vec![new_window_arg];
+
+            if target_profile_input != default_profile_name {
+                let matched_profile = chrome_profiles.iter().find(|cp| {
+                    cp.full_name == target_profile_input
+                        || cp.name == target_profile_input
+                        || cp.profile_name == target_profile_input
+                });
+
+                match matched_profile {
+                    Some(profile) => {
+                        args.push(format!("--profile-directory={}", profile.profile_name));
+                    }
+                    None => {
+                        return Err(format!(
+                            "The specified profile '{}' does not exist in Chrome.",
+                            target_profile_input
+                        ));
+                    }
+                }
+            }
 
             // Convert Vec<Link> into Vec<String> extracting the URL string field
             // Note: Replace `.url` with your actual field name if it's called something else (e.g., .path, .href)
@@ -141,18 +142,22 @@ pub fn execute_chrome_launcher(chrome_launcher: &ChromeLauncher) -> Result<Strin
                 .map(|link| link.url.clone())
                 .collect();
 
-            let mut args = vec![new_window_arg, profile_arg];
             args.extend(urls);
 
             #[cfg(target_os = "windows")]
             {
                 // Attempt 1: Try executing via native PATH lookup
-                if Command::new("chrome.exe").args(&args).spawn().is_err() {
+                use crate::cmd_utils::spawn_detached;
+                let mut cmd = Command::new("chrome.exe");
+                cmd.args(&args);
+
+                if spawn_detached(&mut cmd).is_err() {
                     // Attempt 2: If PATH fails, read the absolute installation path from registry
                     if let Some(registry_path) = get_chrome_path_from_registry() {
-                        Command::new(registry_path)
-                            .args(&args)
-                            .spawn()
+                        let mut registry_cmd = Command::new(registry_path);
+                        registry_cmd.args(&args);
+
+                        spawn_detached(&mut registry_cmd)
                             .map_err(|e| format!("Registry launch failed: {}", e))?;
                     } else {
                         return Err(
@@ -164,12 +169,12 @@ pub fn execute_chrome_launcher(chrome_launcher: &ChromeLauncher) -> Result<Strin
 
             #[cfg(target_os = "macos")]
             {
+                let mut cmd = Command::new("open");
+                cmd.args(["-n", "-a", "Google Chrome", "--args"])
+                    .args(&args);
+
                 // -a specifies the application name
-                Command::new("open")
-                    .args(["-n", "-a", "Google Chrome", "--args"])
-                    .args(&args)
-                    .spawn()
-                    .map_err(|e| e.to_string())?;
+                spawn_detached(&mut cmd).map_err(|e| e.to_string())?;
             }
 
             #[cfg(not(any(target_os = "windows", target_os = "macos")))]
